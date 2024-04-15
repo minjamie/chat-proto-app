@@ -1,13 +1,13 @@
-import { Route, Routes } from "react-router-dom";
-import SignIn from "@pages/SignIn";
-import SignUp from "@pages/SignUp";
+import SignIn from "@/components/sign/SignInComponent";
+import SignUp from "@/components/sign/SignUpComponent";
 import ChatPage from "@/pages/ChatPage";
-import Home from "@/pages/Home";
+import HomePage from "@/pages/HomePage";
+import { Route, Routes } from "react-router-dom";
 
 export default function View() {
   return (
     <Routes>
-      <Route path="/" element={<Home />}></Route>
+      <Route path="/" element={<HomePage />}></Route>
       <Route path="/sign-up" element={<SignIn />}></Route>
       <Route path="/sign-in" element={<SignUp />}></Route>
       <Route path="/chats" element={<ChatPage />}></Route>
