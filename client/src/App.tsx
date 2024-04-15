@@ -1,11 +1,9 @@
 import { useState } from "react";
 import "./App.css";
-import View from "./components/View";
+import Routes from "@routes/Routes";
 
 function App() {
-  const [count, setCount] = useState(0);
-
-  return <View></View>;
+  return <Routes></Routes>;
 }
 
 export default App;
