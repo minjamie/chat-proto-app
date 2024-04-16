@@ -7,11 +7,18 @@ import {
 } from "@chakra-ui/react";
 import { Input, InputGroup, InputRightElement } from "@chakra-ui/input";
 import { useState } from "react";
+import { useToast } from "@chakra-ui/react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 export default function SignInComponent() {
   const [show, setShow] = useState(false);
   const [email, setEmail] = useState<string | null | undefined>();
   const [password, setPassword] = useState<string | null | undefined>();
+  const [loading, setLoading] = useState(false);
+  const toast = useToast();
+
+  const navigate = useNavigate();
 
   const handleClick = () => setShow(!show);
 
@@ -21,6 +28,57 @@ export default function SignInComponent() {
   ) => {
     setValue(value);
   };
+
+  const submitHandler = async () => {
+    setLoading(true);
+    if (!email || !password) {
+      toast({
+        title: "모든 필드 입력",
+        status: "warning",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom",
+      });
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const config = {
+        headers: {
+          "Content-type": "application/json",
+        },
+      };
+
+      const { data } = await axios.post(
+        "/api/user/login",
+        { email, password },
+        config
+      );
+
+      toast({
+        title: "로그인 성공",
+        status: "success",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom",
+      });
+      localStorage.setItem("userInfo", JSON.stringify(data));
+      setLoading(false);
+      navigate("/chats");
+    } catch (error) {
+      toast({
+        title: "서버 에러 발생!",
+        description: error.response.data.message,
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom",
+      });
+      setLoading(false);
+    }
+  };
+
   return (
     <VStack
       as="form"
@@ -58,10 +116,11 @@ export default function SignInComponent() {
         </InputGroup>
       </FormControl>
       <Button
-        colorScheme="blue"
         width="100%"
         style={{ marginTop: 15 }}
         colorScheme="teal"
+        onClick={submitHandler}
+        isLoading={loading}
       >
         로그인
       </Button>
