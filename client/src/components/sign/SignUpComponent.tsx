@@ -2,9 +2,9 @@ import { Button } from "@chakra-ui/button";
 import { FormControl, FormLabel } from "@chakra-ui/form-control";
 import { Input, InputGroup, InputRightElement } from "@chakra-ui/input";
 import { VStack } from "@chakra-ui/layout";
-import { useState } from "react";
 import { useToast } from "@chakra-ui/react";
 import axios from "axios";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function SignUpComponent() {
@@ -83,6 +83,7 @@ export default function SignUpComponent() {
         isClosable: true,
         position: "bottom",
       });
+      setLoading(false);
       return;
     }
     console.log(nickname, email, password, image);
@@ -95,7 +96,7 @@ export default function SignUpComponent() {
       const { data } = await axios.post(
         "/api/user/sign-up",
         {
-          name,
+          nickname,
           email,
           password,
           image,
@@ -104,7 +105,7 @@ export default function SignUpComponent() {
       );
       console.log(data);
       toast({
-        title: "Registration Successful",
+        title: "회원 가입 성공",
         status: "success",
         duration: 5000,
         isClosable: true,

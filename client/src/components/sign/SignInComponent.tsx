@@ -1,15 +1,15 @@
+import { Input, InputGroup, InputRightElement } from "@chakra-ui/input";
 import {
   Button,
   FormControl,
   FormErrorMessage,
   FormLabel,
   VStack,
+  useToast,
 } from "@chakra-ui/react";
-import { Input, InputGroup, InputRightElement } from "@chakra-ui/input";
-import { useState } from "react";
-import { useToast } from "@chakra-ui/react";
-import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function SignInComponent() {
   const [show, setShow] = useState(false);
@@ -51,7 +51,7 @@ export default function SignInComponent() {
       };
 
       const { data } = await axios.post(
-        "/api/user/login",
+        "/api/user/sign-in",
         { email, password },
         config
       );
