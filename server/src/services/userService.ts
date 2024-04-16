@@ -1,19 +1,43 @@
 import generateToken from "@configs/generateToken";
-import errorLoggerMiddleware from "@middlewares/loggerMiddleware";
 import User from "@src/models/userModel";
-import userService from "@src/services/userService";
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-const signUpUser = asyncHandler(async (req: Request, res: Response) => {
-  try {
-    const { nickname, email, password, pic } = req.body;
-    const user = await userService.signUpUser(nickname, email, password, pic);
-    res.status(200).json(user);
-  } catch (error) {
-    console.log(error);
-    errorLoggerMiddleware(error as any, req, res);
+const signUpUser = async (
+  nickname: string,
+  email: string,
+  password: string,
+  pic: string
+) => {
+  if (!nickname || !email || !password) {
+    throw new Error("필드 확인");
   }
-});
+
+  const userExists = await User.findOne({ email });
+
+  if (userExists) {
+    throw new Error("유저 존재");
+  }
+
+  const user = await User.create({
+    nickname,
+    email,
+    password,
+    pic,
+  });
+
+  if (user) {
+    return {
+      _id: user._id,
+      nickname: user.nickname,
+      email: user.email,
+      isAdmin: user.isAdmin,
+      pic: user.pic,
+      token: generateToken(user._id),
+    };
+  } else {
+    throw new Error("발견된 유저없음");
+  }
+};
 
 const signInUser = asyncHandler(async (req: Request, res: Response) => {
   const { email, password } = req.body;
