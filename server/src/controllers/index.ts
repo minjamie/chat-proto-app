@@ -1,4 +1,5 @@
-import userController from "./userController";
 import chatController from "./chatController";
+import userController from "./userController";
 
-export { userController, chatController };
+export { chatController, userController };
+

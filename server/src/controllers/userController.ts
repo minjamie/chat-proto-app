@@ -4,14 +4,17 @@ import User from "@src/models/userModel";
 import userService from "@src/services/userService";
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
+interface IError extends Error {
+  statusCode: number
+}
 const signUpUser = asyncHandler(async (req: Request, res: Response) => {
   try {
     const { nickname, email, password, pic } = req.body;
     const user = await userService.signUpUser(nickname, email, password, pic);
     res.status(200).json(user);
-  } catch (error) {
-    console.log(error);
-    errorLoggerMiddleware(error as any, req, res);
+  } catch (error:any) {
+    errorLoggerMiddleware(error as IError, req, res);
+    res.status(error.statusCode).json(error.message)
   }
 });
 
