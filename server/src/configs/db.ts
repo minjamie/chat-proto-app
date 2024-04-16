@@ -1,6 +1,6 @@
+import colors from "colors";
 import mongoose, { ConnectOptions } from "mongoose";
 import "./env";
-import colors, { yellow } from "colors";
 
 const connectDB = async () => {
   try {
@@ -8,10 +8,10 @@ const connectDB = async () => {
       process.env.MONGO_URI as string,
       {} as ConnectOptions
     );
-
-    console.log(`mongoDB Connected ${conn.connection.host}`);
+  
+    console.log(colors.cyan.underline(`mongoDB Connected ${conn.connection.host}`));
   } catch (error) {
-    if (error instanceof Error) console.log(`Error ${error.message}`);
+    if (error instanceof Error) console.log(colors.red(`Error ${error.message}`));
     process.exit();
   }
 };

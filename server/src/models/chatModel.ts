@@ -1,4 +1,4 @@
-import Chat from "@src/dto/chatDto";
+import Chat from "@src/dtos/chatDto";
 import { Schema, model } from "mongoose";
 
 const chatModel = new Schema<Chat>(

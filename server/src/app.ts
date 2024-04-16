@@ -1,15 +1,18 @@
-import express, { Request, Response, NextFunction } from "express";
-import { Server } from "socket.io";
-import http from "http";
-import helmet from "helmet";
-import cors from "cors";
-import { chats } from "@data/data";
-import dotenv from "dotenv";
-import connectDB from "./config/db";
+import connectDB from "@configs/db";
+import { errorHandler, notFound } from "@middlewares/errorMiddleware";
+import routes from "@routes/index";
 import colors from "colors";
+import cors from "cors";
+import dotenv from "dotenv";
+import express from "express";
+import helmet from "helmet";
+import http from "http";
+import { Server } from "socket.io";
 dotenv.config();
+
 const app = express();
 connectDB();
+
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
@@ -26,17 +29,14 @@ app.use(
     credentials: true,
   })
 );
-app.get("/api/chat", (req, res) => {
-  res.send(chats);
-});
 
-app.get("/api/chat/:id", (req, res) => {
-  const singleChat = chats.find((c) => c._id === req.params.id);
-  res.send(singleChat);
-});
+app.use('/api', routes);
+
+app.use(notFound)
+app.use(errorHandler)
 
 io.on("connect", (socket) => {});
 const PORT = process.env.PORT || 4000;
 server.listen(PORT, () => {
-  console.log(`server listening on port ${PORT}`);
+  console.log(colors.yellow(`server listening on port ${PORT}`));
 });
