@@ -5,9 +5,11 @@ import helmet from "helmet";
 import cors from "cors";
 import { chats } from "@data/data";
 import dotenv from "dotenv";
-const app = express();
+import connectDB from "./config/db";
+import colors from "colors";
 dotenv.config();
-
+const app = express();
+connectDB();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
