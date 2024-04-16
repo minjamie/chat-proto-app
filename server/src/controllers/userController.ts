@@ -1,7 +1,7 @@
 import generateToken from "@configs/generateToken";
 import User from "@src/models/userModel";
+import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { Response, Request } from "express";
 const signUpUser = asyncHandler(async (req: Request, res: Response) => {
   const { nickname, email, password, pic } = req.body;
 
@@ -69,6 +69,7 @@ const getUsers = asyncHandler(async (req: Request, res: Response) => {
       }
     : {};
   const user = await User.find(keyword).find({ _id: { $ne: req.user?._id } });
+  res.json(user);
 });
 export default {
   signUpUser,
