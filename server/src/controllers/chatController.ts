@@ -34,7 +34,13 @@ const fetchChats = asyncHandler(async (req: Request, res: Response) => {
   }
 });
 
-const createGroupChat = () => {};
+const createGroupChat = asyncHandler(async (req: Request, res: Response) => {
+  try {
+    const { users, name } = req.body;
+    const reqUser = req.user;
+    const user = await chatService.createGroupChat(users, name, reqUser);
+  } catch (error) {}
+});
 const addToGroup = () => {};
 const updateGroupChat = () => {};
 const deleteGroupChat = () => {};
