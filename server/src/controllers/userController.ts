@@ -1,4 +1,3 @@
-import generateToken from "@configs/generateToken";
 import errorLoggerMiddleware from "@middlewares/loggerMiddleware";
 import User from "@src/models/userModel";
 import userService from "@src/services/userService";
@@ -31,20 +30,10 @@ const signInUser = asyncHandler(async (req: Request, res: Response) => {
 
 const getUsers = asyncHandler(async (req: Request, res: Response) => {
   try {
-    const keyword = req.query.search
-      ? {
-          $or: [
-            { nickname: { $regex: req.query.search, $options: "i" } },
-            { email: { $regex: req.query.search, $options: "i" } },
-          ],
-        }
-      : {};
-    const user = await User.find(keyword).find({ _id: { $ne: req.user?._id } });
-    if (user) {
-      res.json(user);
-    } else {
-      res.status(404).json("발견된 유저 없음");
-    }
+    const keyword = req.query.search;
+    const userId = req.user?._id;
+    const users = await userService.getUsers(keyword, userId);
+    res.status(200).json(users);
   } catch (error: any) {
     errorLoggerMiddleware(error as IError, req, res);
     res.status(error.statusCode).json(error.message);

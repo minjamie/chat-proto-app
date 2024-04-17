@@ -1,10 +1,12 @@
+import { Document } from "mongoose";
 import { Message } from "./messageDto";
 import User from "./userDto";
 
-export default interface Chat {
+interface IChat {
   chatName: string;
   isGroupChat: boolean;
   users: User[];
   latestMessage: Message;
   groupAdmin: User;
 }
+export default interface IChatDocument extends IChat, Document {}

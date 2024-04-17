@@ -1,7 +1,5 @@
 import generateToken from "@configs/generateToken";
 import User from "@src/models/userModel";
-import { Request, Response } from "express";
-import asyncHandler from "express-async-handler";
 
 interface IError extends Error {
   statusCode: number;
@@ -68,8 +66,26 @@ const signInUser = async (email: string, password: string) => {
     throw error;
   }
 };
-
+const getUsers = async (keyword: any, userId: string) => {
+  keyword
+    ? {
+        $or: [
+          { nickname: { $regex: keyword, $options: "i" } },
+          { email: { $regex: keyword, $options: "i" } },
+        ],
+      }
+    : {};
+  const users = await User.find(keyword).find({ _id: { $ne: userId } });
+  if (users) {
+    return users;
+  } else {
+    const error = new Error("발견된 유저 없음") as IError;
+    error.statusCode = 404;
+    throw error;
+  }
+};
 export default {
   signUpUser,
   signInUser,
+  getUsers,
 };

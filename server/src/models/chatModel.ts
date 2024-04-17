@@ -1,7 +1,8 @@
+import IChatDocument from "@src/dtos/chatDto";
 import Chat from "@src/dtos/chatDto";
 import { Schema, model } from "mongoose";
 
-const chatModel = new Schema<Chat>(
+const chatModel = new Schema<IChatDocument>(
   {
     chatName: { type: String, trim: true },
     isGroupChat: { type: Boolean, default: false },
