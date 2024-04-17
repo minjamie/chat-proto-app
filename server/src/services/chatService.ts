@@ -11,7 +11,7 @@ const getAccessChat = async (userId: string, reqUseId: string) => {
     throw error;
   }
 
-  let isChat = await Chat.find({
+  const isChat = await Chat.find({
     isGroupChat: false,
     $and: [
       { users: { $elemMatch: { $eq: reqUseId } } },
@@ -21,12 +21,12 @@ const getAccessChat = async (userId: string, reqUseId: string) => {
     .populate("users", "-password")
     .populate("latestMessage");
 
-  isChat = await User.populate(isChat, {
+  const resultChat = await User.populate(isChat, {
     path: "latestMessage.sender",
     select: "name pic email",
   });
 
-  if (isChat.length > 0) {
+  if (resultChat.length > 0) {
     return isChat[0];
   } else {
     var chatData = {
