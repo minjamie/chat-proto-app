@@ -48,7 +48,17 @@ const getAccessChat = async (userId: string, reqUseId: string) => {
     }
   }
 };
+const fetchChats = async (userId: string, reqUseId: string) => {
+  const chats = await Chat.find({ users: { $elemMatch: { $eq: reqUseId } } });
+  if (chats) return chats;
+  else {
+    const error = new Error("발견된 채팅 없음") as IError;
+    error.statusCode = 404;
+    throw error;
+  }
+};
 
 export default {
   getAccessChat,
+  fetchChats,
 };
