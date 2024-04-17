@@ -91,7 +91,7 @@ const createGroupChat = async (users: string, name: string, reqUser: any) => {
     groupAdmin: reqUser,
   });
   if (!createdChat) {
-    const error = new Error("그륩 생성 조회 실패") as IError;
+    const error = new Error("그륩 채팅 생성 실패") as IError;
     error.statusCode = 400;
     throw error;
   }
@@ -101,14 +101,36 @@ const createGroupChat = async (users: string, name: string, reqUser: any) => {
 
   if (fullGroupChat) return fullGroupChat;
   else {
-    const error = new Error("그륩 생성 조회 실패") as IError;
+    const error = new Error("그륩 채팅 조회 실패") as IError;
     error.statusCode = 404;
     throw error;
   }
 };
+const updateGroupChat = async (chatId: string, chatName: string) => { 
+  const updatedChat = await Chat.findByIdAndUpdate(
+    chatId,
+    {
+      chatName,
+    },
+    {
+      new: true,
+    }
+  )
+    .populate("users", "-password")
+    .populate("groupAdmin", "-password");
+
+  if (!updatedChat) {
+    const error = new Error("그륩 채팅 조회 실패") as IError;
+    error.statusCode = 404;
+    throw error;
+  } else {
+    return updatedChat;
+  }
+}
 
 export default {
   getAccessChat,
   fetchChats,
   createGroupChat,
+  updateGroupChat
 };

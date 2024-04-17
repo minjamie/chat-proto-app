@@ -1,7 +1,7 @@
-import asyncHandler from "express-async-handler";
-import { Request, Response } from "express";
 import errorLoggerMiddleware from "@middlewares/loggerMiddleware";
 import chatService from "@src/services/chatService";
+import { Request, Response } from "express";
+import asyncHandler from "express-async-handler";
 
 interface IError extends Error {
   statusCode: number;
@@ -38,11 +38,28 @@ const createGroupChat = asyncHandler(async (req: Request, res: Response) => {
   try {
     const { users, name } = req.body;
     const reqUser = req.user;
-    const user = await chatService.createGroupChat(users, name, reqUser);
-  } catch (error) {}
+    if (reqUser) {
+      const groupChat = await chatService.createGroupChat(users, name, reqUser);
+      res.status(200).json(groupChat);
+    }
+  } catch (error: any) {
+    errorLoggerMiddleware(error as IError, req, res);
+    res.status(error.statusCode).json(error.message);
+  }
 });
+
+const updateGroupChat = asyncHandler(async (req: Request, res: Response) => {
+  try {
+    const { chatId, chatName } = req.body;
+    const updatedGroupChat = await chatService.updateGroupChat(chatId, chatName);
+    res.status(200).json(updatedGroupChat);
+  } catch (error:any) {
+    errorLoggerMiddleware(error as IError, req, res);
+    res.status(error.statusCode).json(error.message);
+  }
+});
+
 const addToGroup = () => {};
-const updateGroupChat = () => {};
 const deleteGroupChat = () => {};
 export default {
   getAccessChat,
