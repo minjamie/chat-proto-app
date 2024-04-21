@@ -1,5 +1,5 @@
-import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import { defineConfig } from "vite";
 
 export default defineConfig({
   server: {
@@ -19,6 +19,7 @@ export default defineConfig({
       { find: "@routes", replacement: "/src/routes" },
       { find: "@pages", replacement: "/src/pages" },
       { find: "@common", replacement: "/src/common" },
+      { find: "@context", replacement: "/src/context" },
     ],
   },
 });

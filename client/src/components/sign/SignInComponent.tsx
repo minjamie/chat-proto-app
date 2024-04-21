@@ -66,6 +66,7 @@ export default function SignInComponent() {
       localStorage.setItem("userInfo", JSON.stringify(data));
       setLoading(false);
       navigate("/chats");
+      debugger
     } catch (error) {
       toast({
         title: "서버 에러 발생!",

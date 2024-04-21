@@ -6,6 +6,7 @@
       "@components/*": ["components/*"],
       "@pages/*": ["pages/*"],
       "@routes/*": ["routes/*"],
+      "@context/*": ["context/*"],
       "@common/*": ["common/*"]
     },
     "target": "ES2020",

@@ -8,12 +8,22 @@ import {
   Tabs,
   Text,
 } from "@chakra-ui/react";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import SignInComponent from "../components/sign/SignInComponent";
 import SignUpComponent from "../components/sign/SignUpComponent";
 export default function HomePage() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const user: string | null = JSON.parse(localStorage.getItem("userInfo") ?? 'null');
+    console.log(user)
+    // if(user) return navigate("/chats")
+  }, [navigate])
+  
   return <Container maxW="xl" centerContent>
     <Box
-        d="flex"
+        display="flex"
         justifyContent="center"
         p={3}
         bg="white"
@@ -21,7 +31,7 @@ export default function HomePage() {
         m="40px 0 15px 0"
         borderRadius="lg"
         borderWidth="1px"
-     >
+    >
       <Text fontSize="4xl">데일리 스터디</Text>
     </Box>
     <Box bg="white" w="100%" p={4} borderRadius="lg" borderWidth="1px">
