@@ -67,15 +67,16 @@ const signInUser = async (email: string, password: string) => {
   }
 };
 const getUsers = async (keyword: any, userId: string) => {
-  keyword
-    ? {
+  let filter = {}
+  keyword 
+    ? filter = {
         $or: [
           { nickname: { $regex: keyword, $options: "i" } },
           { email: { $regex: keyword, $options: "i" } },
         ],
       }
-    : {};
-  const users = await User.find(keyword).find({ _id: { $ne: userId } });
+    : filter = {};
+  const users = await User.find(filter).find({ _id: { $ne: userId } });
   if (users) {
     return users;
   } else {

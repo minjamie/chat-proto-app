@@ -8,5 +8,6 @@ interface IChat {
   users: User[];
   latestMessage: Message;
   groupAdmin: User;
+  isDeleted:boolean
 }
 export default interface IChatDocument extends IChat, Document {}

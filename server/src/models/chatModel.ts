@@ -1,5 +1,4 @@
-import IChatDocument from "@src/dtos/chatDto";
-import Chat from "@src/dtos/chatDto";
+import { default as Chat, default as IChatDocument } from "@src/dtos/chatDto";
 import { Schema, model } from "mongoose";
 
 const chatModel = new Schema<IChatDocument>(
@@ -12,6 +11,11 @@ const chatModel = new Schema<IChatDocument>(
       ref: "Message",
     },
     groupAdmin: { type: Schema.Types.ObjectId, ref: "User" },
+    isDeleted: {
+      type: Schema.Types.Boolean,
+      index: true,
+      default: false
+    }
   },
   { timestamps: true }
 );

@@ -59,13 +59,33 @@ const updateGroupChat = asyncHandler(async (req: Request, res: Response) => {
   }
 });
 
-const addToGroup = () => {};
-const deleteGroupChat = () => {};
+const addToGroup = asyncHandler(async (req: Request, res: Response) => {
+  try {
+    const { chatId, userId } = req.body;
+    const updatedGroupChat = await chatService.addToGroup(chatId, userId);
+    res.status(200).json(updatedGroupChat);
+  } catch (error:any) {
+    errorLoggerMiddleware(error as IError, req, res);
+    res.status(error.statusCode).json(error.message);
+  }
+});
+
+const removeFromGroup = asyncHandler(async (req: Request, res: Response) => {
+  try {
+    const { chatId, userId } = req.body;
+    const updatedGroupChat = await chatService.removeFromGroup(chatId, userId);
+    res.status(200).json(updatedGroupChat);
+  } catch (error:any) {
+    errorLoggerMiddleware(error as IError, req, res);
+    res.status(error.statusCode).json(error.message);
+  }
+});
+
 export default {
   getAccessChat,
   fetchChats,
   createGroupChat,
   addToGroup,
   updateGroupChat,
-  deleteGroupChat,
+  removeFromGroup,
 };

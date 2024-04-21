@@ -1,5 +1,7 @@
 import Chat from "@src/models/chatModel";
 import User from "@src/models/userModel";
+import mongoose from 'mongoose';
+const { ObjectId } = mongoose.Types;
 
 interface IError extends Error {
   statusCode: number;
@@ -115,7 +117,7 @@ const updateGroupChat = async (chatId: string, chatName: string) => {
     {
       new: true,
     }
-  )
+  ).where({ isGroupChat: true })
     .populate("users", "-password")
     .populate("groupAdmin", "-password");
 
@@ -128,9 +130,78 @@ const updateGroupChat = async (chatId: string, chatName: string) => {
   }
 }
 
+const addToGroup = async (chatId: string, userId: string) => { 
+  const userObjectId = new ObjectId(userId);
+
+  const isAddedUserChat = await Chat.findOne({ users: userObjectId, isGroupChat: true });
+
+  if (isAddedUserChat) {
+    const error = new Error("이미 방에 추가된 유저") as IError;
+    error.statusCode = 409;
+    throw error; 
+  } else {
+    const addedChat = await Chat.findByIdAndUpdate(
+      chatId,
+      {
+        $push: { users: userId },
+      },
+      {
+        new: true,
+      }
+    ).where({ isGroupChat: true })
+      .populate("users", "-password")
+      .populate("groupAdmin", "-password");
+    
+    if (!addedChat) {
+      const error = new Error("그륩 채팅 조회 실패") as IError;
+      error.statusCode = 404;
+      throw error;
+    } else {
+      return addedChat;
+    }
+  }
+}
+
+const removeFromGroup = async (chatId: string, userId: string) => { 
+  const userObjectId = new ObjectId(userId);
+
+  const isAddedUserChat = await Chat.findOne({ users: userObjectId, isGroupChat: true });
+
+  if (!isAddedUserChat) {
+    const error = new Error("초대되지 않은 유저") as IError;
+    error.statusCode = 409;
+    throw error; 
+  } else {
+    const deletedChat = await Chat.findByIdAndUpdate(
+      chatId,
+      {
+        $pull: { users: userId },
+      },
+      {
+        new: true,
+      }
+    ).where({ isGroupChat: true })
+      .populate("users", "-password")
+      .populate("groupAdmin", "-password");
+  
+      if (!deletedChat) {
+        const error = new Error("그륩 채팅 조회 실패") as IError;
+        error.statusCode = 404;
+        throw error;
+      } else {
+        if (deletedChat?.users.length == 0) {
+          const res = await Chat.updateOne({ _id: chatId }, { $set: { isDeleted: true } });
+        }
+      return deletedChat;
+    }
+  }
+}
+
 export default {
   getAccessChat,
   fetchChats,
   createGroupChat,
-  updateGroupChat
+  updateGroupChat,
+  addToGroup,
+  removeFromGroup        
 };
