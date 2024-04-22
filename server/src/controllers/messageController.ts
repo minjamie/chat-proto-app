@@ -9,13 +9,8 @@ interface IError extends Error {
 
 const getAllMessages = asyncHandler(async (req: Request, res: Response) => {
   try {
-    const { nickname, email, password, pic } = req.body;
-    const user = await messageService.getAllMessages(
-      nickname,
-      email,
-      password,
-      pic
-    );
+    const { chatId } = req.params;
+    const user = await messageService.getAllMessages(chatId);
     res.status(201).json(user);
   } catch (error: any) {
     errorLoggerMiddleware(error as IError, req, res);
