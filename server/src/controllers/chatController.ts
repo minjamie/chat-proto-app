@@ -1,5 +1,5 @@
 import errorLoggerMiddleware from "@middlewares/loggerMiddleware";
-import chatService from "@src/services/chatService";
+import { chatService } from "@services/index";
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 
@@ -50,9 +50,12 @@ const createGroupChat = asyncHandler(async (req: Request, res: Response) => {
 const updateGroupChat = asyncHandler(async (req: Request, res: Response) => {
   try {
     const { chatId, chatName } = req.body;
-    const updatedGroupChat = await chatService.updateGroupChat(chatId, chatName);
+    const updatedGroupChat = await chatService.updateGroupChat(
+      chatId,
+      chatName
+    );
     res.status(200).json(updatedGroupChat);
-  } catch (error:any) {
+  } catch (error: any) {
     errorLoggerMiddleware(error as IError, req, res);
     res.status(error.statusCode).json(error.message);
   }
@@ -63,7 +66,7 @@ const addToGroup = asyncHandler(async (req: Request, res: Response) => {
     const { chatId, userId } = req.body;
     const updatedGroupChat = await chatService.addToGroup(chatId, userId);
     res.status(200).json(updatedGroupChat);
-  } catch (error:any) {
+  } catch (error: any) {
     errorLoggerMiddleware(error as IError, req, res);
     res.status(error.statusCode).json(error.message);
   }
@@ -74,7 +77,7 @@ const removeFromGroup = asyncHandler(async (req: Request, res: Response) => {
     const { chatId, userId } = req.body;
     const updatedGroupChat = await chatService.removeFromGroup(chatId, userId);
     res.status(200).json(updatedGroupChat);
-  } catch (error:any) {
+  } catch (error: any) {
     errorLoggerMiddleware(error as IError, req, res);
     res.status(error.statusCode).json(error.message);
   }

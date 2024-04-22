@@ -1,6 +1,5 @@
 import errorLoggerMiddleware from "@middlewares/loggerMiddleware";
-import User from "@src/models/userModel";
-import userService from "@src/services/userService";
+import { userService } from "@services/index";
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 interface IError extends Error {
