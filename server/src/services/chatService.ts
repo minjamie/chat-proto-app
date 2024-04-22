@@ -66,7 +66,7 @@ const fetchChats = async (reqUseId: string) => {
 
   const resultChat = await User.populate(chats, {
     path: "latestMessage.sender",
-    select: "name pic email",
+    select: "nickname pic email",
   });
 
   if (resultChat) return resultChat;

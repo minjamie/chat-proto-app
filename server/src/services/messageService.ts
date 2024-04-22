@@ -84,23 +84,25 @@ const sendMessage = async (
     content,
     chat: chatId,
   };
-  if (newMessage) {
-    let message = await Message.create(newMessage);
-    message = await Message.populate("sender", "nickname pic").execPopulate();
-    console.log(message);
-    message = await Message.populate("chat").execPopulate();
-    console.log(message);
-    message = await User.populate(message, {
-      path: "chat.users",
-      select: "nickname pic email",
-    });
-    console.log(message);
-    await Chat.findByIdAndUpdate(chatId, {
-      latestMessage: message,
-    });
+  let message = await Message.create(newMessage);
+  message = await (await message
+    .populate("sender", "nickname pic"))
+    .populate("chat")
 
-    return message;
+  const result = await User.populate(message, {
+    path: "chat.users",
+    select: "nickname pic email",
+  });
+
+  if (result) {
+    await Chat.findByIdAndUpdate(chatId, { latestMessage: result });
+    return result;
+  } else {
+    const error = new Error("메시지 전송에 실패") as IError;
+    error.statusCode = 500;
+    throw error;
   }
+  
 };
 export default {
   getAllMessages,
