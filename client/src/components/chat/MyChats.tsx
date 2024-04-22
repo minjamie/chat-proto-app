@@ -67,7 +67,7 @@ export default function MyChats({fetchAgain, setFetchAgain}) {
             fontSize={{ base: "17px", md: "10px", lg: "17px" }}
             rightIcon={<AddIcon />}
           >
-            New Group Chat
+          새로운 그륩 채팅방 생성
           </Button>
         </GroupChatModal>
       </Box>

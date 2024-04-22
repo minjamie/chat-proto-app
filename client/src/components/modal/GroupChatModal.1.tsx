@@ -83,6 +83,7 @@ export default function GroupChatModal({ children }) {
         },
         config
       );
+      debugger
       setChats([data, ...chats]);
       onClose();      
       toast({

@@ -1,4 +1,5 @@
-import { Button, Image, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Text, useDisclosure } from "@chakra-ui/react";
+import { ViewIcon } from "@chakra-ui/icons";
+import { Button, IconButton, Image, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Text, useDisclosure } from "@chakra-ui/react";
 
 export default function ProfileModal({user, children}) {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -31,8 +32,8 @@ export default function ProfileModal({user, children}) {
             <Text fontSize={{ base: "28px", md: "30px" }}>Email: {user.email }</Text>
           </ModalBody>
           <ModalFooter>
-            <Button colorScheme="blue">닫기</Button>
-            <Button variant="ghost">액션</Button>
+            <Button colorScheme="blue" onClick={onClose}>행동</Button>
+            <Button variant="ghost" onClick={onClose}>닫기</Button>
           </ModalFooter>
         </ModalContent>
       </Modal>

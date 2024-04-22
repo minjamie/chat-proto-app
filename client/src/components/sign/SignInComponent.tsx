@@ -54,7 +54,7 @@ export default function SignInComponent() {
         "/api/user/sign-in",
         { email, password },
         config
-      );
+      ); 
 
       toast({
         title: "로그인 성공",
@@ -66,11 +66,10 @@ export default function SignInComponent() {
       localStorage.setItem("userInfo", JSON.stringify(data));
       setLoading(false);
       navigate("/chats");
-      debugger
     } catch (error) {
       toast({
-        title: "서버 에러 발생!",
-        description: error.response.data.message,
+        title: "로그인 실패",
+        description: error.response.data,
         status: "error",
         duration: 5000,
         isClosable: true,

@@ -53,8 +53,13 @@ const getAccessChat = async (userId: string, reqUseId: string) => {
     }
   }
 };
-const fetchChats = async (userId: string, reqUseId: string) => {
-  const chats = await Chat.find({ users: { $elemMatch: { $eq: reqUseId } } })
+const fetchChats = async (reqUseId: string) => {
+  const chats = await Chat.find({
+    $or: [
+      { users: { $elemMatch: { $eq: reqUseId } } },
+      { groupAdmin: reqUseId}
+    ]
+  })
     .populate("users", "-password")
     .populate("groupAdmin", "-password")
     .populate("latestMessage");
@@ -133,13 +138,6 @@ const updateGroupChat = async (chatId: string, chatName: string) => {
 const addToGroup = async (chatId: string, userId: string) => { 
   const userObjectId = new ObjectId(userId);
 
-  const isAddedUserChat = await Chat.findOne({ users: userObjectId, isGroupChat: true });
-
-  if (isAddedUserChat) {
-    const error = new Error("이미 방에 추가된 유저") as IError;
-    error.statusCode = 409;
-    throw error; 
-  } else {
     const addedChat = await Chat.findByIdAndUpdate(
       chatId,
       {
@@ -159,7 +157,6 @@ const addToGroup = async (chatId: string, userId: string) => {
     } else {
       return addedChat;
     }
-  }
 }
 
 const removeFromGroup = async (chatId: string, userId: string) => { 

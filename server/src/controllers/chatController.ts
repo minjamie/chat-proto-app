@@ -22,10 +22,9 @@ const getAccessChat = asyncHandler(async (req: Request, res: Response) => {
 
 const fetchChats = asyncHandler(async (req: Request, res: Response) => {
   try {
-    const { userId } = req.body;
     const reqUseId = req.user?._id;
     if (reqUseId) {
-      const user = await chatService.fetchChats(userId, reqUseId);
+      const user = await chatService.fetchChats(reqUseId);
       res.status(200).json(user);
     }
   } catch (error: any) {

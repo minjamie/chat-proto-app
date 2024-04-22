@@ -1,8 +1,5 @@
 import { Button } from "@chakra-ui/button";
-import { FormControl, FormLabel } from "@chakra-ui/form-control";
-import { Input, InputGroup, InputRightElement } from "@chakra-ui/input";
-import { VStack } from "@chakra-ui/layout";
-import { useToast } from "@chakra-ui/react";
+import { FormControl, FormLabel, Input, InputGroup, InputRightElement, VStack, useToast } from "@chakra-ui/react";
 import axios from "axios";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -29,7 +26,8 @@ export default function SignUpComponent() {
     setValue(value);
   };
 
-  const postDetails = (selectedImage: File) => {
+  const postDetails = (event: File) => {
+    const selectedImage = event.target.files[0]
     setLoading(true);
     if (!selectedImage)
       toast({
@@ -64,6 +62,7 @@ export default function SignUpComponent() {
 
   const submitHandler = async () => {
     setLoading(true);
+    console.log(nickname,email,password,confirmPassword)
     if (!nickname || !email || !password || !confirmPassword) {
       toast({
         title: "모든 필드 입력",
@@ -86,7 +85,6 @@ export default function SignUpComponent() {
       setLoading(false);
       return;
     }
-    console.log(nickname, email, password, image);
     try {
       const config = {
         headers: {
@@ -103,7 +101,6 @@ export default function SignUpComponent() {
         },
         config
       );
-      console.log(data);
       toast({
         title: "회원 가입 성공",
         status: "success",
@@ -188,11 +185,11 @@ export default function SignUpComponent() {
           type="file"
           p={1.5}
           accept="image/*"
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            postDetails(e.target.files[0])
-          }
+          onChange={postDetails}
         />
+
       </FormControl>
+
       <Button
         colorScheme="blue"
         width="100%"

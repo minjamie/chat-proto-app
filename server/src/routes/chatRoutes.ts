@@ -6,7 +6,7 @@ router.get("/", protect, chatController.fetchChats);
 router.post("/", protect, chatController.getAccessChat);
 router.post("/group", protect, chatController.createGroupChat);
 router.put("/group", protect, chatController.updateGroupChat);
-router.delete("/group", protect, chatController.removeFromGroup);
-router.put("/groupadd", protect, chatController.addToGroup);
+router.put("/group/remove", protect, chatController.removeFromGroup);
+router.put("/group/add", protect, chatController.addToGroup);
 
 export default router;
