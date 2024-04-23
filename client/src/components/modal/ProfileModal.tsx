@@ -1,11 +1,13 @@
+import UserModel from "@/models/userModel";
 import { ViewIcon } from "@chakra-ui/icons";
 import { Button, IconButton, Image, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Text, useDisclosure } from "@chakra-ui/react";
+import { ReactNode } from "react";
 
-export default function ProfileModal({user, children}) {
+export default function ProfileModal({user, children}: {user: UserModel, children: ReactNode}) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   return (
     <>{
-      children ? <span onClick={onOpen}>{children}</span> : <IconButton icon={<ViewIcon />} onClick={onOpen}></IconButton>
+      children ? <span onClick={onOpen}>{children}</span> : <IconButton icon={<ViewIcon />} onClick={onOpen} aria-label={""}></IconButton>
     }
       <Modal isOpen={isOpen} onClose={onClose} isCentered>
         <ModalOverlay />
@@ -27,7 +29,7 @@ export default function ProfileModal({user, children}) {
               borderRadius={"full"}
               boxSize={"150px"}
               src={user.pic}
-              alt={user.name}
+              alt={user.nickname}
             ></Image>
             <Text fontSize={{ base: "28px", md: "30px" }}>Email: {user.email }</Text>
           </ModalBody>

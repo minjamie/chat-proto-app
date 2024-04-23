@@ -1,16 +1,18 @@
 import { getSender } from "@/common/chatLogics";
 import { ChatState } from "@/context/chatProvider";
+import { ChatStateType } from "@/models/context/ChatStateType";
+import UserModel from "@/models/userModel";
 import { AddIcon } from "@chakra-ui/icons";
 import { Box, Button, Stack, Text } from "@chakra-ui/react";
 import { useToast } from "@chakra-ui/toast";
+import GroupChatModal from "@components/modal/GroupChatModal";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import GroupChatModal from "../modal/GroupChatModal.1";
 import ChatLoading from "./ChatLoading";
 
-export default function MyChats({fetchAgain, setFetchAgain}) {
-  const [loggedUser, setLoggedUser] = useState();
-  const { selectedChat, setSelectedChat, user, chats, setChats } = ChatState();
+export default function MyChats({fetchAgain} : {fetchAgain: boolean}) {
+  const [loggedUser, setLoggedUser] = useState<UserModel | null>(null);
+  const { selectedChat, setSelectedChat, user, chats, setChats } = ChatState() as ChatStateType;
   const toast = useToast();
   const fetchChats = async () => {
     try {
@@ -35,8 +37,20 @@ export default function MyChats({fetchAgain, setFetchAgain}) {
   };
   
   useEffect(() => {
-    setLoggedUser(JSON.parse(localStorage.getItem("userInfo")));
-    fetchChats();
+    const userInfoString = localStorage.getItem("userInfo");
+    if (userInfoString) {
+      setLoggedUser(JSON.parse(userInfoString));
+      fetchChats();
+    } else {
+      toast({
+        title: "로그인 토큰 만료",
+        description: "나의 채팅 목록 조회  실패",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom-left",
+      })
+    }
   }, [fetchAgain])
 
   return (
@@ -96,7 +110,7 @@ export default function MyChats({fetchAgain, setFetchAgain}) {
               >
                 <Text>
                   {!chat.isGroupChat
-                    ? getSender(loggedUser, chat.users)
+                    ? getSender(loggedUser!, chat.users)
                     : chat.chatName}
                 </Text>
                 {chat.latestMessage && (

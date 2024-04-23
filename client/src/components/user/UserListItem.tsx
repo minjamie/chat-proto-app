@@ -1,6 +1,8 @@
+import UserModel from "@/models/userModel";
 import { Avatar, Box, Text } from "@chakra-ui/react";
+import { MouseEventHandler } from "react";
 
-export default function UserListItem({ handleFunction, user }) {
+export default function UserListItem({ handleFunction, user } : {user:UserModel, handleFunction: MouseEventHandler<HTMLSpanElement>}) {
   return (
     <Box
       onClick={handleFunction}

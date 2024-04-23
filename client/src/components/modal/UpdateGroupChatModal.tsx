@@ -1,6 +1,8 @@
 
 
 import { ChatState } from "@/context/chatProvider";
+import { ChatStateType } from "@/models/context/ChatStateType";
+import UserModel from "@/models/userModel";
 import { ViewIcon } from "@chakra-ui/icons";
 import { Box, Button, FormControl, IconButton, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Spinner, useDisclosure, useToast } from "@chakra-ui/react";
 import UserBadgeItem from "@components/user/UserBadgeItem";
@@ -9,16 +11,15 @@ import axios from "axios";
 import { useState } from "react";
 
 
-export default function UpdateGroupChatModal({fetchAgain, setFetchAgain}) {
+export default function UpdateGroupChatModal({fetchAgain, setFetchAgain} : {fetchAgain: boolean, setFetchAgain: React.Dispatch<React.SetStateAction<boolean>>}) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [groupChatName, setGroupChatName] = useState<string>("");
-  const [selectedUsers, setSelectedUsers] = useState([]);
   const [search, setSearch] = useState<string>("");
   const [searchResult, setSearchResult] = useState([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [renameLoading, setRenameLoading] = useState<boolean>(false);
   const toast = useToast();
-  const { selectedChat, setSelectedChat, user, notification, setNotification } = ChatState();
+  const { selectedChat, setSelectedChat, user } = ChatState() as ChatStateType;
   
   const handleRename = async () => {
     if (!groupChatName) return 
@@ -32,7 +33,7 @@ export default function UpdateGroupChatModal({fetchAgain, setFetchAgain}) {
       const { data } = await axios.put(
         `/api/chat/group`,
         {
-          chatId: selectedChat._id,
+          chatId: selectedChat?._id,
           chatName: groupChatName,
         },
         config
@@ -44,7 +45,7 @@ export default function UpdateGroupChatModal({fetchAgain, setFetchAgain}) {
     } catch (error) {
       toast({
         title: "그륩 수정 실패",
-        description: error.response.data.message,
+        description: "그륩 수정에 실패했습니다.",
         status: "error",
         duration: 5000,
         isClosable: true,
@@ -85,8 +86,8 @@ export default function UpdateGroupChatModal({fetchAgain, setFetchAgain}) {
     }
   }
 
-  const handleAddUser = async (addedUser) => {
-    if (selectedChat.users.find((user) => user._id === addedUser._id)) {
+  const handleAddUser = async (addedUser: UserModel) => {
+    if (selectedChat?.users.find((user) => user._id === addedUser._id)) {
       toast({
         title: "이미 추가된 유저",
         status: "warning",
@@ -97,7 +98,7 @@ export default function UpdateGroupChatModal({fetchAgain, setFetchAgain}) {
       return
     }
 
-    if (selectedChat.groupAdmin._id !== user._id) {
+    if (selectedChat?.groupAdmin?._id !== user._id) {
       toast({
         title: "관리자만 추가할 수 있음",
         status: "error",
@@ -129,8 +130,8 @@ export default function UpdateGroupChatModal({fetchAgain, setFetchAgain}) {
       setLoading(false);
     } catch (error) {
       toast({
-        title: "그륩 채팅 내 유저 추가 실패",
-        description: error.response.data,
+        title: "유저 추가 실패",
+        description: "그륩 채팅 내 유저 추가 실패",
         status: "error",
         duration: 5000,
         isClosable: true,
@@ -142,8 +143,8 @@ export default function UpdateGroupChatModal({fetchAgain, setFetchAgain}) {
   }
 
 
-  const handleRemove = async (removeUser) => {
-    if (selectedChat.groupAdmin._id !== removeUser._id && removeUser._id == user.id) {
+  const handleRemove = async (removeUser: UserModel) => {
+    if (selectedChat?.groupAdmin?._id !== removeUser._id && removeUser._id == user._id) {
       toast({
         title: "관리자만 추방할 수 있음",
         status: "error",
@@ -163,19 +164,19 @@ export default function UpdateGroupChatModal({fetchAgain, setFetchAgain}) {
       const { data } = await axios.put(
         `/api/chat/group/remove`,
         {
-          chatId: selectedChat._id,
+          chatId: selectedChat?._id,
           userId: removeUser._id,
         },
         config
       );
 
-      removeUser._id === user._id ? setSelectedChat() : setSelectedChat(data);
+      removeUser._id === user._id ? setSelectedChat("") : setSelectedChat(data);
       setFetchAgain(!fetchAgain);
       setLoading(false);
     } catch (error) {
       toast({
-        title: "그륩 채팅 내 유저 추방 실패!",
-        description: error.response.data.message,
+        title: "유저 추방 실패",
+        description: "그륩 채팅 내 유저 추방 실패",
         status: "error",
         duration: 5000,
         isClosable: true,
@@ -205,11 +206,11 @@ export default function UpdateGroupChatModal({fetchAgain, setFetchAgain}) {
           <ModalCloseButton />
           <ModalBody display="flex" flexDir="column" alignItems="center">
             <Box w="100%" display="flex" flexWrap="wrap" pb={3}>
-              {selectedChat.users.map((user) => (
+              {selectedChat?.users.map((user) => (
                 <UserBadgeItem
                   key={user._id}
                   user={user}
-                  admin={selectedChat.groupAdmin}
+                  admin={selectedChat?.groupAdmin?._id}
                   handleFunction={() => handleRemove(user)} />
               ))}
             </Box>
@@ -240,7 +241,7 @@ export default function UpdateGroupChatModal({fetchAgain, setFetchAgain}) {
             {loading ? (
               <Spinner size="lg" />
             ) : (
-              searchResult?.map((user) => (
+              searchResult?.map((user : UserModel) => (
                 <UserListItem
                   key={user._id}
                   user={user}

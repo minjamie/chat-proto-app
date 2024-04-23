@@ -69,7 +69,7 @@ export default function SignInComponent() {
     } catch (error) {
       toast({
         title: "로그인 실패",
-        description: error.response.data,
+        description: "유요하지 않은 입력으로 로그인 실패",
         status: "error",
         duration: 5000,
         isClosable: true,

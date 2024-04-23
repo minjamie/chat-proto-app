@@ -1,5 +1,7 @@
 import { getSender } from "@/common/chatLogics";
 import { ChatState } from "@/context/chatProvider";
+import { ChatStateType } from "@/models/context/ChatStateType";
+import UserModel from "@/models/userModel";
 import { BellIcon, ChevronDownIcon } from "@chakra-ui/icons";
 import { Box, Text } from "@chakra-ui/layout";
 import { Avatar, Button, Drawer, DrawerBody, DrawerContent, DrawerHeader, DrawerOverlay, Input, Menu, MenuButton, MenuDivider, MenuItem, MenuList, Spinner, Tooltip, useDisclosure, useToast } from "@chakra-ui/react";
@@ -8,17 +10,16 @@ import ProfileModal from "@components/modal/ProfileModal";
 import UserListItem from "@components/user/UserListItem";
 import axios from "axios";
 import { useState } from "react";
-import NotificationBadge, { Effect } from "react-notification-badge";
 import { useNavigate } from "react-router-dom";
 
 
 export default function SideDrawer() {
   const [search, setSearch] = useState("");
-  const [searchResult, setSearchResult] = useState();
+  const [searchResult, setSearchResult] = useState<UserModel[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [loadingChat, setLoadingChat] = useState<boolean>(false);
 
-  const { user, setUser, selectedChat, setSelectedChat, chats, setChats, notification, setNotification } = ChatState();
+  const { user, setSelectedChat, chats, setChats, notification, setNotification } = ChatState() as ChatStateType;
   const { isOpen, onOpen, onClose } = useDisclosure();
   const navigate = useNavigate();
   const toast = useToast();
@@ -109,11 +110,28 @@ export default function SideDrawer() {
       <div>
         <Menu>
             <MenuButton p={1}>
-              <NotificationBadge
-                count={notification.length}
-                effect={Effect.SCALE}
-              />
-            <BellIcon />
+              <div style={{ position: 'relative', display: 'inline-block' }}>
+              {notification.length > 0 && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: '-8px',
+                    right: '-8px',
+                    backgroundColor: 'red',
+                    color: 'white',
+                    width: '15px',
+                    height: '15px',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}
+                >
+                  {notification.length}
+                </div>
+              )}
+              </div>
+              <BellIcon style={{fontSize: "25px"}}/>
             </MenuButton>
             <MenuList pl={2}>
               {!notification.length && "No New Messages"}
@@ -164,7 +182,7 @@ export default function SideDrawer() {
             {loading ? (
               <ChatLoading />
             ) : (
-              searchResult?.map((user) => (
+              searchResult?.map((user :UserModel) => (
                 <UserListItem
                   key={user._id}
                   user={user}
@@ -172,7 +190,7 @@ export default function SideDrawer() {
                 />
               ))
             )}
-            {loadingChat && <Spinner ml="auto" d="flex" />}
+            {loadingChat && <Spinner ml="auto" display="flex" />}
           </DrawerBody>
         </DrawerContent>
       </Drawer>

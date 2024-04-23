@@ -25,9 +25,9 @@
     "formik": "^2.4.5",
     "framer-motion": "^6.5.1",
     "react": "^18.2.0",
+    "react-badge": "^1.0.0",
     "react-dom": "^18.2.0",
     "react-lottie": "^1.2.4",
-    "react-notification-badge": "^1.5.1",
     "react-router-dom": "^6.22.3",
     "react-scrollable-feed": "^2.0.1",
     "socket.io-client": "^4.7.5",
@@ -36,6 +36,7 @@
   "devDependencies": {
     "@types/react": "^18.2.66",
     "@types/react-dom": "^18.2.22",
+    "@types/react-lottie": "^1.2.10",
     "@typescript-eslint/eslint-plugin": "^7.2.0",
     "@typescript-eslint/parser": "^7.2.0",
     "@vitejs/plugin-react": "^4.2.1",

@@ -1,5 +1,8 @@
 import { getSender, getSenderFull } from "@/common/chatLogics";
 import { ChatState } from "@/context/chatProvider";
+import ChatModel from "@/models/chatModel";
+import { ChatStateType } from "@/models/context/ChatStateType";
+import MessageModel from "@/models/messageModel";
 import { ArrowBackIcon } from "@chakra-ui/icons";
 import {
   Box,
@@ -16,22 +19,20 @@ import UpdateGroupChatModal from "@components/modal/UpdateGroupChatModal";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import Lottie from "react-lottie";
-import io from "socket.io-client";
+import io, { Socket } from "socket.io-client";
 import ScrollableChat from "./ScrollableChat";
 import "./SingleChat.css";
-export default function SingleChat({ fetchAgain, setFetchAgain }) {
-  const [messages, setMessages] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [isTyping, setIstyping] = useState(false);
-  const [newMessage, setNewMessage] = useState("");
-  const [socketConnected, setSocketConnected] = useState(false);
-  const [typing, setTyping] = useState(false);
-  const [istyping, setIsTyping] = useState(false);
-  const [socket, setSocket] = useState(null);
-  const [selectedChatCompare, setSelectedChatCompare] = useState(null)
-  const [newMessageReceived, setNewMessageReceived] = useState()
+export default function SingleChat({ fetchAgain, setFetchAgain } : {fetchAgain: boolean, setFetchAgain: React.Dispatch<React.SetStateAction<boolean>>}) {
+  const [messages, setMessages] = useState<MessageModel[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [newMessage, setNewMessage] = useState<string>("");
+  const [socketConnected, setSocketConnected] = useState<boolean>(false);
+  const [typing, setTyping] = useState<boolean>(false);
+  const [isTyping, setIsTyping] = useState<boolean>(false);
+  const [socket, setSocket] = useState<null | Socket>(null);
+  const [selectedChatCompare, setSelectedChatCompare] = useState<ChatModel | string>();
   const { selectedChat, setSelectedChat, user, notification, setNotification } =
-    ChatState();
+    ChatState() as ChatStateType;
   const toast = useToast();
 
   const defaultOptions = {
@@ -74,20 +75,9 @@ export default function SingleChat({ fetchAgain, setFetchAgain }) {
     }
   })
 
-  useEffect(() => {
-
-
-    if (selectedChatCompare && newMessageReceived) {
-      if (selectedChatCompare._id !== newMessageReceived.chat._id) {
-        debugger;
-      }
-    }
-
-  })
-
-  const sendMessage = async (e) => {
+  const sendMessage = async (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && newMessage) {
-      socket.emit("stop typing", selectedChat._id);
+      if(socket) socket.emit("stop typing", selectedChat?._id);
       if (e.nativeEvent.isComposing) return;
         try {
         const config = {
@@ -101,11 +91,11 @@ export default function SingleChat({ fetchAgain, setFetchAgain }) {
           "/api/message",
           {
             content: newMessage,
-            chatId: selectedChat._id,
+            chatId: selectedChat?._id,
           },
           config
         );
-        socket.emit("new message", data)
+        if(socket) socket.emit("new message", data)
         setMessages([...messages, data])
       } catch (error) {
         toast({
@@ -136,7 +126,7 @@ export default function SingleChat({ fetchAgain, setFetchAgain }) {
       );
       setMessages(data)
       setLoading(false);
-      socket.emit("join chat", selectedChat._id)
+      if(socket) socket.emit("join chat", selectedChat._id)
     } catch (error) {
       console.log(error)
       toast({
@@ -152,17 +142,16 @@ export default function SingleChat({ fetchAgain, setFetchAgain }) {
 
   useEffect(() => {
     fetchMessages()
-    setSelectedChatCompare(selectedChat)
+    if(selectedChat) setSelectedChatCompare(selectedChat)
   }, [selectedChat])
-        console.log(notification, "=-=-==-=-=-=-=-")
   
-  const typingHandler = (e) => {
+  const typingHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNewMessage(e.target.value);
         if (!socketConnected) return;
 
     if (!typing) {
       setTyping(true);
-      socket.emit("typing", selectedChat._id);
+      if (socket) socket.emit("typing", selectedChat?._id);
     }
     const lastTypingTime = new Date().getTime();
     const timerLength = 3000;
@@ -170,7 +159,7 @@ export default function SingleChat({ fetchAgain, setFetchAgain }) {
       const timeNow = new Date().getTime();
       const timeDiff = timeNow - lastTypingTime;
       if (timeDiff >= timerLength && typing) {
-        socket.emit("stop typing", selectedChat._id);
+        if (socket) socket.emit("stop typing", selectedChat?._id);
         setTyping(false);
       }
     }, timerLength);
@@ -194,13 +183,13 @@ export default function SingleChat({ fetchAgain, setFetchAgain }) {
             <IconButton
               display="flex"
               icon={<ArrowBackIcon />}
-              onClick={() => setSelectedChat("")}
+              onClick={() => setSelectedChat('')}
               aria-label={""}
             />
             {!selectedChat.isGroupChat ? (
               <>
                 {getSender(user, selectedChat.users)}
-                <ProfileModal user={getSenderFull(user, selectedChat.users)} />
+                <ProfileModal user={getSenderFull(user, selectedChat.users)} children={null} />
               </>
             ) : (
               <>
@@ -236,7 +225,7 @@ export default function SingleChat({ fetchAgain, setFetchAgain }) {
             )}
 
             <FormControl onKeyDown={sendMessage} isRequired mt={3} id="first-name" >
-              {istyping ? (
+              {isTyping ? (
                 <div>
                   <Lottie
                     options={defaultOptions}

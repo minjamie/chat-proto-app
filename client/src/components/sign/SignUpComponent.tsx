@@ -26,8 +26,8 @@ export default function SignUpComponent() {
     setValue(value);
   };
 
-  const postDetails = (event: File) => {
-    const selectedImage = event.target.files[0]
+  const postDetails = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedImage = event.target.files?.[0]
     setLoading(true);
     if (!selectedImage)
       toast({
@@ -113,8 +113,8 @@ export default function SignUpComponent() {
       navigate("/");
     } catch (error) {
       toast({
-        title: "서버 에러 발생",
-        description: error?.response?.data?.message,
+        title: "회원가입 실패",
+        description: "서버 오류로 회원 가입 실패했습니다.",
         status: "error",
         duration: 5000,
         isClosable: true,

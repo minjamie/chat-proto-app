@@ -1,7 +1,9 @@
+import UserModel from "@/models/userModel";
 import { CloseIcon } from "@chakra-ui/icons";
 import { Badge } from "@chakra-ui/react";
+import { MouseEventHandler } from "react";
 
-export default function UserBadgeItem({ user, handleFunction }) {
+export default function UserBadgeItem({ user, handleFunction, admin } : {user:UserModel, handleFunction: MouseEventHandler<HTMLSpanElement>, admin: string}) {
 
   return (
     <Badge
@@ -17,7 +19,7 @@ export default function UserBadgeItem({ user, handleFunction }) {
       onClick={handleFunction}
     >
       {user.nickname}
-      {/* {admin === user._id && <span> (Admin)</span>} */}
+      {admin === user._id && <span> (Admin)</span>}
       <CloseIcon pl={1} />
     </Badge>  )
 }

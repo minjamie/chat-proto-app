@@ -20,6 +20,7 @@ export default defineConfig({
       { find: "@pages", replacement: "/src/pages" },
       { find: "@common", replacement: "/src/common" },
       { find: "@context", replacement: "/src/context" },
+      { find: "@models", replacement: "/src/models" },
     ],
   },
 });
