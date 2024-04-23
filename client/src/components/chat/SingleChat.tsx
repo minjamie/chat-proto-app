@@ -10,11 +10,13 @@ import {
   Text,
   useToast,
 } from "@chakra-ui/react";
+import animationData from "@common/typing.json";
 import ProfileModal from "@components/modal/ProfileModal";
 import UpdateGroupChatModal from "@components/modal/UpdateGroupChatModal";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import io, { Socket } from "socket.io-client";
+import Lottie from "react-lottie";
+import io from "socket.io-client";
 import ScrollableChat from "./ScrollableChat";
 import "./SingleChat.css";
 export default function SingleChat({ fetchAgain, setFetchAgain }) {
@@ -23,24 +25,71 @@ export default function SingleChat({ fetchAgain, setFetchAgain }) {
   const [isTyping, setIstyping] = useState(false);
   const [newMessage, setNewMessage] = useState("");
   const [socketConnected, setSocketConnected] = useState(false);
+  const [typing, setTyping] = useState(false);
+  const [istyping, setIsTyping] = useState(false);
+  const [socket, setSocket] = useState(null);
+  const [selectedChatCompare, setSelectedChatCompare] = useState(null)
+  const [newMessageReceived, setNewMessageReceived] = useState()
   const { selectedChat, setSelectedChat, user, notification, setNotification } =
     ChatState();
   const toast = useToast();
 
+  const defaultOptions = {
+    loop: true,
+    autoplay: true,
+    animationData: animationData,
+    rendererSettings: {
+      preserveAspectRatio: "xMidYMid slice",
+    },
+  };
+
   const ENDPOINT = "http://localhost:4000";
-  let socket: Socket;
+
 
   useEffect(() => {
-    socket = io(ENDPOINT, { withCredentials: true })
-    socket.emit("setup", user)
-    socket.on("connected", () => {
-      setSocketConnected(true)
-    }) 
-  }, [])
+    const newSocket = io(ENDPOINT);
+    newSocket.emit("setup", user);
+    newSocket.on("connected", () => setSocketConnected(true));
+    newSocket.on("typing", () => setIsTyping(true));
+    newSocket.on("stop typing", () => setIsTyping(false));
+    setSocket(newSocket);
+
+    return () => {
+      newSocket.disconnect();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (socket) {
+      socket.on("message received", (newMessageReceived) => {
+        if (!selectedChatCompare) {
+          if (!notification.includes(newMessageReceived)) {
+            setNotification([newMessageReceived, ...notification]);
+              setFetchAgain(!fetchAgain);
+            }
+        } else {
+          setMessages([...messages, newMessageReceived])
+        }
+      })
+    }
+  })
+
+  useEffect(() => {
+
+
+    if (selectedChatCompare && newMessageReceived) {
+      if (selectedChatCompare._id !== newMessageReceived.chat._id) {
+        debugger;
+      }
+    }
+
+  })
 
   const sendMessage = async (e) => {
     if (e.key === "Enter" && newMessage) {
-      try {
+      socket.emit("stop typing", selectedChat._id);
+      if (e.nativeEvent.isComposing) return;
+        try {
         const config = {
           headers: {
             "Content-type": "application/json",
@@ -56,6 +105,7 @@ export default function SingleChat({ fetchAgain, setFetchAgain }) {
           },
           config
         );
+        socket.emit("new message", data)
         setMessages([...messages, data])
       } catch (error) {
         toast({
@@ -71,7 +121,8 @@ export default function SingleChat({ fetchAgain, setFetchAgain }) {
   };
 
   const fetchMessages = async () => {
- if (!selectedChat) return;
+  
+    if (!selectedChat) return;
     try {
       const config = {
         headers: {
@@ -101,10 +152,29 @@ export default function SingleChat({ fetchAgain, setFetchAgain }) {
 
   useEffect(() => {
     fetchMessages()
-  },[selectedChat])
+    setSelectedChatCompare(selectedChat)
+  }, [selectedChat])
+        console.log(notification, "=-=-==-=-=-=-=-")
   
   const typingHandler = (e) => {
     setNewMessage(e.target.value);
+        if (!socketConnected) return;
+
+    if (!typing) {
+      setTyping(true);
+      socket.emit("typing", selectedChat._id);
+    }
+    const lastTypingTime = new Date().getTime();
+    const timerLength = 3000;
+    setTimeout(() => {
+      const timeNow = new Date().getTime();
+      const timeDiff = timeNow - lastTypingTime;
+      if (timeDiff >= timerLength && typing) {
+        socket.emit("stop typing", selectedChat._id);
+        setTyping(false);
+      }
+    }, timerLength);
+
   };
 
   return (
@@ -165,14 +235,15 @@ export default function SingleChat({ fetchAgain, setFetchAgain }) {
                 <div className="messages"><ScrollableChat messages={messages} /></div>
             )}
 
-            <FormControl onKeyDown={sendMessage} isRequired mt={3}>
-              {isTyping ? (
+            <FormControl onKeyDown={sendMessage} isRequired mt={3} id="first-name" >
+              {istyping ? (
                 <div>
-                  {/* <Lottie
+                  <Lottie
                     options={defaultOptions}
+                    // height={50}
                     width={70}
                     style={{ marginBottom: 15, marginLeft: 0 }}
-                  /> */}
+                  />
                 </div>
               ) : (
                 <></>

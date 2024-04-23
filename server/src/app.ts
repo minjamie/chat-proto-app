@@ -8,6 +8,7 @@ import express from "express";
 import helmet from "helmet";
 import http from "http";
 import { Server } from "socket.io";
+import IUserDocument from "./dtos/userDto";
 dotenv.config();
 
 const app = express();
@@ -41,13 +42,28 @@ io.on("connection", (socket) => {
 
   socket.on("setup", (userData) => {
     socket.join(userData?._id)
-    console.log(userData?._id)
     socket.emit("connected")
+    console.log("connected : " + userData?._id)
   })
 
   socket.on("join chat", (room) => {
     socket.join(room)
-    console.log("user joined room " + room)
+    console.log("user joined room : " + room)
+  })
+
+  socket.on("typing", (room) => {
+    socket.in(room).emit("typing")
+    console.log(colors.yellow(room))
+  })
+  socket.on("stop typing", (room)=> socket.in(room).emit("stop typing"))
+
+  socket.on("new message", (newMessageReceived) => {
+    let chat = newMessageReceived.chat;
+    if (!chat.users) return console.log("chat user not defined")
+    chat.users.forEach((user: IUserDocument) => {
+      if (user._id == newMessageReceived.sender._id) return;
+      socket.in(user._id).emit('message received', newMessageReceived)
+    })
   })
 });
 const PORT = process.env.PORT || 4000;

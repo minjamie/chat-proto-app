@@ -1,3 +1,4 @@
+import { getSender } from "@/common/chatLogics";
 import { ChatState } from "@/context/chatProvider";
 import { BellIcon, ChevronDownIcon } from "@chakra-ui/icons";
 import { Box, Text } from "@chakra-ui/layout";
@@ -7,6 +8,7 @@ import ProfileModal from "@components/modal/ProfileModal";
 import UserListItem from "@components/user/UserListItem";
 import axios from "axios";
 import { useState } from "react";
+import NotificationBadge, { Effect } from "react-notification-badge";
 import { useNavigate } from "react-router-dom";
 
 
@@ -16,7 +18,7 @@ export default function SideDrawer() {
   const [loading, setLoading] = useState<boolean>(false);
   const [loadingChat, setLoadingChat] = useState<boolean>(false);
 
-  const { user, setUser, selectedChat, setSelectedChat, chats, setChats } = ChatState();
+  const { user, setUser, selectedChat, setSelectedChat, chats, setChats, notification, setNotification } = ChatState();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const navigate = useNavigate();
   const toast = useToast();
@@ -106,11 +108,30 @@ export default function SideDrawer() {
       <Text fontSize={"2xl"}>데일리 스터디</Text>
       <div>
         <Menu>
-          <MenuButton p={1}>
+            <MenuButton p={1}>
+              <NotificationBadge
+                count={notification.length}
+                effect={Effect.SCALE}
+              />
             <BellIcon />
-          </MenuButton>
-          {/* <MenuList></MenuList> */}
-        </Menu>
+            </MenuButton>
+            <MenuList pl={2}>
+              {!notification.length && "No New Messages"}
+              {notification.map((noti) => (
+                <MenuItem
+                  key={noti._id}
+                  onClick={() => {
+                    setSelectedChat(noti.chat);
+                    setNotification(notification.filter((n) => n !== noti));
+                  }}
+                >
+                  {noti.chat.isGroupChat
+                    ? `그륩 채팅 '${noti.chat.chatName}' 새 메시지`
+                    : `'${getSender(user, noti.chat.users)}' 새 메시지`}
+                </MenuItem>
+              ))}
+            </MenuList>
+          </Menu>
         <Menu>
           <MenuButton as={Button} rightIcon={<ChevronDownIcon />}>
             <Avatar size="sm" cursor="pointer" name={user.nickname} src={user.pic}></Avatar>

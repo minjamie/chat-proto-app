@@ -17,8 +17,6 @@ export default function HomePage() {
 
   useEffect(() => {
     const user: string | null = JSON.parse(localStorage.getItem("userInfo") ?? 'null');
-    console.log(user)
-    // if(user) return navigate("/chats")
   }, [navigate])
   
   return <Container maxW="xl" centerContent>
