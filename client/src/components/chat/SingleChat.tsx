@@ -8,21 +8,104 @@ import {
   Input,
   Spinner,
   Text,
+  useToast,
 } from "@chakra-ui/react";
 import ProfileModal from "@components/modal/ProfileModal";
 import UpdateGroupChatModal from "@components/modal/UpdateGroupChatModal";
-import { useState } from "react";
-
+import axios from "axios";
+import { useEffect, useState } from "react";
+import io, { Socket } from "socket.io-client";
+import ScrollableChat from "./ScrollableChat";
+import "./SingleChat.css";
 export default function SingleChat({ fetchAgain, setFetchAgain }) {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isTyping, setIstyping] = useState(false);
   const [newMessage, setNewMessage] = useState("");
+  const [socketConnected, setSocketConnected] = useState(false);
   const { selectedChat, setSelectedChat, user, notification, setNotification } =
     ChatState();
+  const toast = useToast();
 
-  const sendMessage = () => {};
-  const typingHandler = () => {};
+  const ENDPOINT = "http://localhost:4000";
+  let socket: Socket;
+
+  useEffect(() => {
+    socket = io(ENDPOINT, { withCredentials: true })
+    socket.emit("setup", user)
+    socket.on("connected", () => {
+      setSocketConnected(true)
+    }) 
+  }, [])
+
+  const sendMessage = async (e) => {
+    if (e.key === "Enter" && newMessage) {
+      try {
+        const config = {
+          headers: {
+            "Content-type": "application/json",
+            Authorization: `Bearer ${user.token}`,
+          },
+        };
+        setNewMessage("");
+        const { data } = await axios.post(
+          "/api/message",
+          {
+            content: newMessage,
+            chatId: selectedChat._id,
+          },
+          config
+        );
+        setMessages([...messages, data])
+      } catch (error) {
+        toast({
+          title: "메시지 발송 실패",
+          description: "메시지 전송에 실패했습니다.",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+          position: "bottom",
+        });
+      }
+    }
+  };
+
+  const fetchMessages = async () => {
+ if (!selectedChat) return;
+    try {
+      const config = {
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      };
+      setLoading(true);
+      const { data } = await axios.get(
+        `/api/message/${selectedChat._id}`,
+        config
+      );
+      setMessages(data)
+      setLoading(false);
+      socket.emit("join chat", selectedChat._id)
+    } catch (error) {
+      console.log(error)
+      toast({
+        title: "메시지 조회 실패",
+        description: "메시지 조회에 실패했습니다.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom",
+      });
+    }
+  };
+
+  useEffect(() => {
+    fetchMessages()
+  },[selectedChat])
+  
+  const typingHandler = (e) => {
+    setNewMessage(e.target.value);
+  };
 
   return (
     <>
@@ -79,7 +162,7 @@ export default function SingleChat({ fetchAgain, setFetchAgain }) {
                 margin="auto"
               />
             ) : (
-              <div>메세지</div>
+                <div className="messages"><ScrollableChat messages={messages} /></div>
             )}
 
             <FormControl onKeyDown={sendMessage} isRequired mt={3}>

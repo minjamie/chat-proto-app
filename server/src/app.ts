@@ -15,6 +15,7 @@ connectDB();
 
 const server = http.createServer(app);
 const io = new Server(server, {
+  pingTimeout: 60000,
   cors: {
     origin: "http://localhost:5173",
     credentials: true,
@@ -35,7 +36,20 @@ app.use('/api', routes);
 app.use(notFound)
 app.use(errorHandler)
 
-io.on("connect", (socket) => {});
+io.on("connection", (socket) => {
+  console.log("connected to socket.io")
+
+  socket.on("setup", (userData) => {
+    socket.join(userData?._id)
+    console.log(userData?._id)
+    socket.emit("connected")
+  })
+
+  socket.on("join chat", (room) => {
+    socket.join(room)
+    console.log("user joined room " + room)
+  })
+});
 const PORT = process.env.PORT || 4000;
 server.listen(PORT, () => {
   console.log(colors.yellow(`server listening on port ${PORT}`));
