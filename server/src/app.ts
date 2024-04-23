@@ -34,19 +34,12 @@ app.use(
 );
 
 app.use('/api', routes);
-// 배포용 
 const __dirname1 = path.resolve()
-if (process.env.NODE_ENV === "prod") {
-  app.use(express.static(path.join(__dirname1, "/client/build")))
+app.use(express.static(path.join(__dirname1, "../../client/dist/index.html")))
 
-  app.get("*", (req, res) => {
-    res.sendFile(path.resolve(__dirname1, "client", "build", "index.html"))
-  })
-} else {
-  app.get("/", (req, res) => {
-    res.send("API is running..");
-  });
-}
+app.get("*", (req, res) => {
+  res.sendFile(path.resolve(__dirname1, "client", "build", "index.html"))
+})
 
 app.use(notFound)
 app.use(errorHandler)

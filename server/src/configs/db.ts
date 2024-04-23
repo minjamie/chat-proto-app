@@ -1,5 +1,5 @@
 import colors from "colors";
-import mongoose, { ConnectOptions } from "mongoose";
+import mongoose from "mongoose";
 import "./env";
 
 const connectDB = async () => {
