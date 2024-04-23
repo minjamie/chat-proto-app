@@ -11,16 +11,15 @@ import path from "path";
 import { Server } from "socket.io";
 import IUserDocument from "./dtos/userDto";
 dotenv.config();
-
 const app = express();
 connectDB();
 
 const server = http.createServer(app);
+
 const io = new Server(server, {
   pingTimeout: 60000,
   cors: {
-    origin: "http://localhost:5173",
-    credentials: true,
+    origin: '*',
   },
 });
 
@@ -28,20 +27,17 @@ app.use(helmet());
 app.use(express.json());
 app.use(
   cors({
-    origin: "http://localhost:5173",
-    credentials: true,
+    origin: "*",
   })
 );
 
 app.use("/api", routes);
 const __dirname1 = path.resolve();
-console.log(__dirname1);
 app.use(express.static(path.join(__dirname1, "../client/dist")));
 
 app.get("*", (req, res) => {
   res.sendFile(path.resolve(__dirname1, "../client", "dist", "index.html"));
 });
-
 app.use(notFound);
 app.use(errorHandler);
 
