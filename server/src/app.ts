@@ -33,45 +33,45 @@ app.use(
   })
 );
 
-app.use('/api', routes);
-const __dirname1 = path.resolve()
-app.use(express.static(path.join(__dirname1, "../../client/dist/index.html")))
+app.use("/api", routes);
+const __dirname1 = path.resolve();
+app.use(express.static(path.join(__dirname1, "../../client/dist/index.html")));
 
 app.get("*", (req, res) => {
-  res.sendFile(path.resolve(__dirname1, "client", "build", "index.html"))
-})
+  res.sendFile(path.resolve(__dirname1, "../../client/dist", "index.html"));
+});
 
-app.use(notFound)
-app.use(errorHandler)
+app.use(notFound);
+app.use(errorHandler);
 
 io.on("connection", (socket) => {
-  console.log("connected to socket.io")
+  console.log("connected to socket.io");
 
   socket.on("setup", (userData) => {
-    socket.join(userData?._id)
-    socket.emit("connected")
-    console.log("connected : " + userData?._id)
-  })
+    socket.join(userData?._id);
+    socket.emit("connected");
+    console.log("connected : " + userData?._id);
+  });
 
   socket.on("join chat", (room) => {
-    socket.join(room)
-    console.log("user joined room : " + room)
-  })
+    socket.join(room);
+    console.log("user joined room : " + room);
+  });
 
   socket.on("typing", (room) => {
-    socket.in(room).emit("typing")
-    console.log(colors.yellow(room))
-  })
-  socket.on("stop typing", (room)=> socket.in(room).emit("stop typing"))
+    socket.in(room).emit("typing");
+    console.log(colors.yellow(room));
+  });
+  socket.on("stop typing", (room) => socket.in(room).emit("stop typing"));
 
   socket.on("new message", (newMessageReceived) => {
     let chat = newMessageReceived.chat;
-    if (!chat.users) return console.log("chat user not defined")
+    if (!chat.users) return console.log("chat user not defined");
     chat.users.forEach((user: IUserDocument) => {
       if (user._id == newMessageReceived.sender._id) return;
-      socket.in(user._id).emit('message received', newMessageReceived)
-    })
-  })
+      socket.in(user._id).emit("message received", newMessageReceived);
+    });
+  });
 });
 const PORT = process.env.PORT || 4000;
 server.listen(PORT, () => {
