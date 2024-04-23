@@ -35,10 +35,11 @@ app.use(
 
 app.use("/api", routes);
 const __dirname1 = path.resolve();
-app.use(express.static(path.join(__dirname1, "../../client/dist/index.html")));
+console.log(__dirname1);
+app.use(express.static(path.join(__dirname1, "../client/dist")));
 
 app.get("*", (req, res) => {
-  res.sendFile(path.resolve(__dirname1, "../../client/dist", "index.html"));
+  res.sendFile(path.resolve(__dirname1, "../client", "dist", "index.html"));
 });
 
 app.use(notFound);
