@@ -7,6 +7,7 @@ import dotenv from "dotenv";
 import express from "express";
 import helmet from "helmet";
 import http from "http";
+import path from "path";
 import { Server } from "socket.io";
 import IUserDocument from "./dtos/userDto";
 dotenv.config();
@@ -33,6 +34,19 @@ app.use(
 );
 
 app.use('/api', routes);
+// 배포용 
+const __dirname1 = path.resolve()
+if (process.env.NODE_ENV === "prod") {
+  app.use(express.static(path.join(__dirname1, "/client/build")))
+
+  app.get("*", (req, res) => {
+    res.sendFile(path.resolve(__dirname1, "client", "build", "index.html"))
+  })
+} else {
+  app.get("/", (req, res) => {
+    res.send("API is running..");
+  });
+}
 
 app.use(notFound)
 app.use(errorHandler)
