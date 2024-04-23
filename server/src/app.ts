@@ -23,7 +23,10 @@ const io = new Server(server, {
   },
 });
 
-app.use(helmet());
+app.use(helmet({
+    contentSecurityPolicy: false,
+  })
+);
 app.use(express.json());
 app.use(
   cors({
