@@ -22,6 +22,8 @@ import Lottie from "react-lottie";
 import io, { Socket } from "socket.io-client";
 import ScrollableChat from "./ScrollableChat";
 import "./SingleChat.css";
+const endPoint = import.meta.env.VITE_API_BASE_URL;
+
 export default function SingleChat({
   fetchAgain,
   setFetchAgain,
@@ -52,10 +54,8 @@ export default function SingleChat({
     },
   };
 
-  const ENDPOINT = "https://short-tudy.onrender.com";
-
   useEffect(() => {
-    const newSocket = io(ENDPOINT);
+    const newSocket = io(endPoint);
     newSocket.emit("setup", user);
     newSocket.on("connected", () => setSocketConnected(true));
     newSocket.on("typing", () => setIsTyping(true));

@@ -1,8 +1,18 @@
 import { Button } from "@chakra-ui/button";
-import { FormControl, FormLabel, Input, InputGroup, InputRightElement, VStack, useToast } from "@chakra-ui/react";
+import {
+  FormControl,
+  FormLabel,
+  Input,
+  InputGroup,
+  InputRightElement,
+  VStack,
+  useToast,
+} from "@chakra-ui/react";
 import axios from "axios";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+const imageUpdateUrl = import.meta.env.VITE_UPLOAD_URL;
+const imageUploadCloudName = import.meta.env.VITE_UPLOAD_CLOUD_NAME;
 
 export default function SignUpComponent() {
   const [show, setShow] = useState(false);
@@ -27,7 +37,7 @@ export default function SignUpComponent() {
   };
 
   const postDetails = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedImage = event.target.files?.[0]
+    const selectedImage = event.target.files?.[0];
     setLoading(true);
     if (!selectedImage)
       toast({
@@ -46,9 +56,9 @@ export default function SignUpComponent() {
       const data = new FormData();
       data.append("file", selectedImage);
       data.append("upload_preset", "chat-app");
-      data.append("cloud_name", "dsfyp40dr");
+      data.append("cloud_name", imageUploadCloudName as string);
 
-      fetch(`https://api.cloudinary.com/v1_1/dsfyp40dr/upload`, {
+      fetch(imageUpdateUrl as string, {
         method: "POST",
         body: data,
       })
@@ -62,7 +72,7 @@ export default function SignUpComponent() {
 
   const submitHandler = async () => {
     setLoading(true);
-    console.log(nickname,email,password,confirmPassword)
+    console.log(nickname, email, password, confirmPassword);
     if (!nickname || !email || !password || !confirmPassword) {
       toast({
         title: "모든 필드 입력",
@@ -181,13 +191,7 @@ export default function SignUpComponent() {
       </FormControl>
       <FormControl id="image">
         <FormLabel>프로필 사진</FormLabel>
-        <Input
-          type="file"
-          p={1.5}
-          accept="image/*"
-          onChange={postDetails}
-        />
-
+        <Input type="file" p={1.5} accept="image/*" onChange={postDetails} />
       </FormControl>
 
       <Button

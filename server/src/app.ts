@@ -31,12 +31,19 @@ app.use(
 );
 
 app.use("/api", routes);
-const __dirname1 = path.resolve();
-app.use(express.static(path.join(__dirname1, "../client/dist")));
 
-app.get("*", (req, res) => {
-  res.sendFile(path.resolve(__dirname1, "../client", "dist", "index.html"));
-});
+const __dirname1 = path.resolve();
+if (process.env.NODE_ENV === "prod") {
+  app.use(express.static(path.join(__dirname1, "../client/dist")));
+
+  app.get("*", (req, res) => {
+    res.sendFile(path.resolve(__dirname1, "../client", "dist", "index.html"));
+  });
+} else {
+  app.get("/", (req, res) => {
+    res.json("dev API server is running");
+  });
+}
 app.use(notFound);
 app.use(errorHandler);
 
