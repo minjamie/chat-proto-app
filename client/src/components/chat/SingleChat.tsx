@@ -52,7 +52,7 @@ export default function SingleChat({
     },
   };
 
-  const ENDPOINT = "http://localhost:4000";
+  const ENDPOINT = "https://short-tudy.onrender.com";
 
   useEffect(() => {
     const newSocket = io(ENDPOINT);
