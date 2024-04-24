@@ -22,7 +22,13 @@ import Lottie from "react-lottie";
 import io, { Socket } from "socket.io-client";
 import ScrollableChat from "./ScrollableChat";
 import "./SingleChat.css";
-export default function SingleChat({ fetchAgain, setFetchAgain } : {fetchAgain: boolean, setFetchAgain: React.Dispatch<React.SetStateAction<boolean>>}) {
+export default function SingleChat({
+  fetchAgain,
+  setFetchAgain,
+}: {
+  fetchAgain: boolean;
+  setFetchAgain: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
   const [messages, setMessages] = useState<MessageModel[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [newMessage, setNewMessage] = useState<string>("");
@@ -30,7 +36,9 @@ export default function SingleChat({ fetchAgain, setFetchAgain } : {fetchAgain: 
   const [typing, setTyping] = useState<boolean>(false);
   const [isTyping, setIsTyping] = useState<boolean>(false);
   const [socket, setSocket] = useState<null | Socket>(null);
-  const [selectedChatCompare, setSelectedChatCompare] = useState<ChatModel | string>();
+  const [selectedChatCompare, setSelectedChatCompare] = useState<
+    ChatModel | string
+  >();
   const { selectedChat, setSelectedChat, user, notification, setNotification } =
     ChatState() as ChatStateType;
   const toast = useToast();
@@ -46,13 +54,16 @@ export default function SingleChat({ fetchAgain, setFetchAgain } : {fetchAgain: 
 
   const ENDPOINT = "http://localhost:4000";
 
-
   useEffect(() => {
     const newSocket = io(ENDPOINT);
     newSocket.emit("setup", user);
     newSocket.on("connected", () => setSocketConnected(true));
     newSocket.on("typing", () => setIsTyping(true));
     newSocket.on("stop typing", () => setIsTyping(false));
+    newSocket.on("error", (error: unknown) => {
+      console.log("Socket connection error:", error);
+    });
+
     setSocket(newSocket);
 
     return () => {
@@ -66,20 +77,20 @@ export default function SingleChat({ fetchAgain, setFetchAgain } : {fetchAgain: 
         if (!selectedChatCompare) {
           if (!notification.includes(newMessageReceived)) {
             setNotification([newMessageReceived, ...notification]);
-              setFetchAgain(!fetchAgain);
-            }
+            setFetchAgain(!fetchAgain);
+          }
         } else {
-          setMessages([...messages, newMessageReceived])
+          setMessages([...messages, newMessageReceived]);
         }
-      })
+      });
     }
-  })
+  });
 
   const sendMessage = async (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && newMessage) {
-      if(socket) socket.emit("stop typing", selectedChat?._id);
+      if (socket) socket.emit("stop typing", selectedChat?._id);
       if (e.nativeEvent.isComposing) return;
-        try {
+      try {
         const config = {
           headers: {
             "Content-type": "application/json",
@@ -95,8 +106,8 @@ export default function SingleChat({ fetchAgain, setFetchAgain } : {fetchAgain: 
           },
           config
         );
-        if(socket) socket.emit("new message", data)
-        setMessages([...messages, data])
+        if (socket) socket.emit("new message", data);
+        setMessages([...messages, data]);
       } catch (error) {
         toast({
           title: "메시지 발송 실패",
@@ -111,7 +122,6 @@ export default function SingleChat({ fetchAgain, setFetchAgain } : {fetchAgain: 
   };
 
   const fetchMessages = async () => {
-  
     if (!selectedChat) return;
     try {
       const config = {
@@ -124,11 +134,11 @@ export default function SingleChat({ fetchAgain, setFetchAgain } : {fetchAgain: 
         `/api/message/${selectedChat._id}`,
         config
       );
-      setMessages(data)
+      setMessages(data);
       setLoading(false);
-      if(socket) socket.emit("join chat", selectedChat._id)
+      if (socket) socket.emit("join chat", selectedChat._id);
     } catch (error) {
-      console.log(error)
+      console.log(error);
       toast({
         title: "메시지 조회 실패",
         description: "메시지 조회에 실패했습니다.",
@@ -141,13 +151,13 @@ export default function SingleChat({ fetchAgain, setFetchAgain } : {fetchAgain: 
   };
 
   useEffect(() => {
-    fetchMessages()
-    if(selectedChat) setSelectedChatCompare(selectedChat)
-  }, [selectedChat])
-  
+    fetchMessages();
+    if (selectedChat) setSelectedChatCompare(selectedChat);
+  }, [selectedChat]);
+
   const typingHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNewMessage(e.target.value);
-        if (!socketConnected) return;
+    if (!socketConnected) return;
 
     if (!typing) {
       setTyping(true);
@@ -163,7 +173,6 @@ export default function SingleChat({ fetchAgain, setFetchAgain } : {fetchAgain: 
         setTyping(false);
       }
     }, timerLength);
-
   };
 
   return (
@@ -183,13 +192,16 @@ export default function SingleChat({ fetchAgain, setFetchAgain } : {fetchAgain: 
             <IconButton
               display="flex"
               icon={<ArrowBackIcon />}
-              onClick={() => setSelectedChat('')}
+              onClick={() => setSelectedChat("")}
               aria-label={""}
             />
             {!selectedChat.isGroupChat ? (
               <>
                 {getSender(user, selectedChat.users)}
-                <ProfileModal user={getSenderFull(user, selectedChat.users)} children={null} />
+                <ProfileModal
+                  user={getSenderFull(user, selectedChat.users)}
+                  children={null}
+                />
               </>
             ) : (
               <>
@@ -221,10 +233,17 @@ export default function SingleChat({ fetchAgain, setFetchAgain } : {fetchAgain: 
                 margin="auto"
               />
             ) : (
-                <div className="messages"><ScrollableChat messages={messages} /></div>
+              <div className="messages">
+                <ScrollableChat messages={messages} />
+              </div>
             )}
 
-            <FormControl onKeyDown={sendMessage} isRequired mt={3} id="first-name" >
+            <FormControl
+              onKeyDown={sendMessage}
+              isRequired
+              mt={3}
+              id="first-name"
+            >
               {isTyping ? (
                 <div>
                   <Lottie

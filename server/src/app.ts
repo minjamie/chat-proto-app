@@ -10,6 +10,7 @@ import http from "http";
 import path from "path";
 import { Server } from "socket.io";
 import IUserDocument from "./dtos/userDto";
+import errorLoggerMiddleware from "./middlewares/loggerMiddleware";
 dotenv.config();
 const app = express();
 connectDB();
@@ -19,11 +20,12 @@ const server = http.createServer(app);
 const io = new Server(server, {
   pingTimeout: 60000,
   cors: {
-    origin: '*',
+    origin: "http://localhost:5173",
   },
 });
 
-app.use(helmet({
+app.use(
+  helmet({
     contentSecurityPolicy: false,
   })
 );
@@ -51,6 +53,11 @@ io.on("connection", (socket) => {
     socket.join(userData?._id);
     socket.emit("connected");
     console.log("connected : " + userData?._id);
+  });
+
+  socket.on("error", (error) => {
+    console.error("Socket connection error:", error);
+    errorLoggerMiddleware(error);
   });
 
   socket.on("join chat", (room) => {

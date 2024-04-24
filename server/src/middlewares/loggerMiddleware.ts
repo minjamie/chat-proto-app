@@ -32,8 +32,8 @@ const saveErrorLog = async (logData: {
 
 const errorLoggerMiddleware = (
   err: Error,
-  req: { method: any; url: any; params: any; query: any; body: any; ip: any },
-  res: any
+  req?: { method: any; url: any; params: any; query: any; body: any; ip: any },
+  res?: any
 ) => {
   const { method, url, params, query, body, ip } = req;
   const errorLogData = {
