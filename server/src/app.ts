@@ -10,7 +10,6 @@ import http from "http";
 import path from "path";
 import { Server } from "socket.io";
 import IUserDocument from "./dtos/userDto";
-import errorLoggerMiddleware from "./middlewares/loggerMiddleware";
 dotenv.config();
 const app = express();
 connectDB();
@@ -57,7 +56,6 @@ io.on("connection", (socket) => {
 
   socket.on("error", (error) => {
     console.error("Socket connection error:", error);
-    errorLoggerMiddleware(error);
   });
 
   socket.on("join chat", (room) => {
