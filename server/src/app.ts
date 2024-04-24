@@ -17,12 +17,12 @@ import { useSession } from "./redis/connect-redis";
 dotenv.config();
 const app = express();
 connectDB();
-const redisStore = new RedisStore({ client: Redis });
+// const redisStore = new RedisStore({ client: Redis });
 
 const server = http.createServer(app);
 
 const io = new Server(server, {});
-const redisClient = new Redis();
+// const redisClient = new Redis();
 app.use(
   helmet({
     contentSecurityPolicy: false,
@@ -48,6 +48,15 @@ if (process.env.NODE_ENV === "prod") {
 } else {
   app.get("/", (req, res) => {
     res.json("dev API server is running");
+  });
+
+  // 세션 키 값을 테스트
+  app.get("/test-session", (req, res) => {
+    // 세션에 테스트 값을 설정
+    req.session.test = "Hello, session!";
+
+    // 세션 키 값을 응답으로 보내기
+    res.json({ sessionKey: req.session.test });
   });
 }
 app.use(notFound);
