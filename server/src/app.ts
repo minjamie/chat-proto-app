@@ -9,15 +9,20 @@ import helmet from "helmet";
 import http from "http";
 import path from "path";
 import { Server } from "socket.io";
+import session from "express-session";
+import Redis from "ioredis";
+import RedisStore from "connect-redis";
 import IUserDocument from "./dtos/userDto";
+import { useSession } from "./redis/connect-redis";
 dotenv.config();
 const app = express();
 connectDB();
+const redisStore = new RedisStore({ client: Redis });
 
 const server = http.createServer(app);
 
 const io = new Server(server, {});
-
+const redisClient = new Redis();
 app.use(
   helmet({
     contentSecurityPolicy: false,
@@ -29,6 +34,7 @@ app.use(
     origin: "*",
   })
 );
+app.use(useSession());
 
 app.use("/api", routes);
 
