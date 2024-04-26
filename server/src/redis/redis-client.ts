@@ -4,7 +4,17 @@ const redisOptions: RedisClientOptions = {
     // host: process.env.REDIS_HOST,
     // port: Number(process.env.REDIS_PORT),
   },
-  // password: process.env.REDIS_PASSWORD,
+  url: `redis://${process.env.REDIS_USERNAME}:${process.env.REDIS_PASSWORD}@${process.env.REDIS_HOST}:${process.env.REDIS_PORT}/0`,
+  legacyMode: true,
 };
+const redisClient = createClient(redisOptions);
+redisClient.connect();
 
-export const redisClient = createClient(redisOptions);
+redisClient.on("connect", () => {
+  console.info("Redis connected!");
+});
+redisClient.on("error", (err) => {
+  console.error("Redis Client Error", err);
+});
+
+export default redisClient;

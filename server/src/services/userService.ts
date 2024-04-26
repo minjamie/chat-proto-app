@@ -1,9 +1,41 @@
 import generateToken from "@configs/generateToken";
 import User from "@src/models/userModel";
+import redisClient from "@src/redis/redis-client";
 
 interface IError extends Error {
   statusCode: number;
 }
+
+const saveUserKey = async (userPK: string, userObjectId: string) => {
+  const savedUserPK = await redisClient.set(userPK.toString(), userObjectId);
+  const savedUserObjectId = await redisClient.set(userObjectId, userPK);
+  if (savedUserPK && savedUserObjectId)
+    return {
+      savedUserPK,
+      savedUserObjectId,
+    };
+  else {
+    const error = new Error("유저 키 생성 안됌") as IError;
+    error.statusCode = 500;
+    throw error;
+  }
+};
+
+const getUserKey = async (userPK: string, userObjectId: string) => {
+  let userKey;
+  if (userPK) {
+    userKey = await redisClient.get(userPK);
+  } else {
+    userKey = await redisClient.get(userObjectId);
+  }
+  if (!userKey) {
+    const error = new Error("유저 키 발견 안됌") as IError;
+    error.statusCode = 404;
+    throw error;
+  } else {
+    return userKey;
+  }
+};
 
 const signUpUser = async (
   nickname: string,
@@ -67,15 +99,15 @@ const signInUser = async (email: string, password: string) => {
   }
 };
 const getUsers = async (keyword: any, userId: string) => {
-  let filter = {}
-  keyword 
-    ? filter = {
+  let filter = {};
+  keyword
+    ? (filter = {
         $or: [
           { nickname: { $regex: keyword, $options: "i" } },
           { email: { $regex: keyword, $options: "i" } },
         ],
-      }
-    : filter = {};
+      })
+    : (filter = {});
   const users = await User.find(filter).find({ _id: { $ne: userId } });
   if (users) {
     return users;
@@ -85,8 +117,7 @@ const getUsers = async (keyword: any, userId: string) => {
     throw error;
   }
 };
-export default {
-  signUpUser,
-  signInUser,
-  getUsers,
-};
+export default { saveUserKey, getUserKey, signUpUser, signInUser, getUsers };
+function next() {
+  throw new Error("Function not implemented.");
+}

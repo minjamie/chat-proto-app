@@ -16,7 +16,6 @@ import IUserDocument from "./dtos/userDto";
 import { useSession } from "./redis/connect-redis";
 dotenv.config();
 const app = express();
-connectDB();
 // const redisStore = new RedisStore({ client: Redis });
 
 const server = http.createServer(app);
@@ -34,7 +33,7 @@ app.use(
     origin: "*",
   })
 );
-app.use(useSession());
+app.use(useSession);
 
 app.use("/api", routes);
 
@@ -46,6 +45,7 @@ if (process.env.NODE_ENV === "prod") {
     res.sendFile(path.resolve(__dirname1, "../client", "dist", "index.html"));
   });
 } else {
+  console.log("?");
   app.get("/", (req, res) => {
     res.json("dev API server is running");
   });
@@ -53,15 +53,15 @@ if (process.env.NODE_ENV === "prod") {
   // 세션 키 값을 테스트
   app.get("/test-session", (req, res) => {
     // 세션에 테스트 값을 설정
-    req.session.test = "Hello, session!";
-
     // 세션 키 값을 응답으로 보내기
-    res.json({ sessionKey: req.session.test });
   });
 }
 app.use(notFound);
 app.use(errorHandler);
-
+io.use((socket, next: unknown) => {
+  console.log(socket.request);
+  useSession(socket.request, {}, next);
+});
 io.on("connection", (socket) => {
   console.log("connected to socket.io");
 
