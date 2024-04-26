@@ -1,7 +1,7 @@
 import RedisStore from "connect-redis";
-var session = require("express-session");
-import redisClient from "./redis-client";
+import session from "express-session";
 import { IncomingMessage } from "http";
+import redisClient from "./redis-client";
 
 interface sessionConfig {}
 export const sessionConfig = {
