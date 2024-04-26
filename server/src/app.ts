@@ -12,8 +12,8 @@ import { Server } from "socket.io";
 import IUserDocument from "./dtos/userDto";
 import { useSession } from "./redis/connect-redis";
 dotenv.config();
+connectDB();
 const app = express();
-
 const server = http.createServer(app);
 
 const io = new Server(server, {});
