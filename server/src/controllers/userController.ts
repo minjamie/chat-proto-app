@@ -1,5 +1,6 @@
 import errorLoggerMiddleware from "@middlewares/loggerMiddleware";
 import { userService } from "@services/index";
+import redisClient from "@src/redis/redis-client";
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 interface IError extends Error {
@@ -9,8 +10,9 @@ interface IError extends Error {
 const saveUserKey = asyncHandler(async (req: Request, res: Response) => {
   try {
     const { pk, objectId } = req.body;
-    const saveKey = await userService.saveUserKey(pk, objectId);
-    res.status(201).json(saveKey);
+    await redisClient.set(pk.toString(), objectId);
+    await redisClient.set(objectId, pk);
+    res.status(201).json("성공적으로 유저 key를 생성");
   } catch (error: any) {
     errorLoggerMiddleware(error as IError, req, res);
     res.status(error.statusCode).json(error.message);
@@ -19,10 +21,19 @@ const saveUserKey = asyncHandler(async (req: Request, res: Response) => {
 
 const getUserKey = asyncHandler(async (req: Request, res: Response) => {
   try {
-    const pk = req.query.pk as string;
-    const objectId = req.query.objectId as string;
-    const user = await userService.getUserKey(pk, objectId);
-    res.status(201).json(user);
+    const { key } = req.query;
+    if (key) {
+      //@ts-ignore
+      await redisClient.get(key as string, (err: any, value: any) => {
+        if (!value) {
+          const error = new Error("유저 키 발견 안됌") as IError;
+          error.statusCode = 404;
+          throw error;
+        } else {
+          res.status(201).json(value);
+        }
+      });
+    }
   } catch (error: any) {
     errorLoggerMiddleware(error as IError, req, res);
     res.status(error.statusCode).json(error.message);

@@ -9,19 +9,14 @@ import helmet from "helmet";
 import http from "http";
 import path from "path";
 import { Server } from "socket.io";
-import session from "express-session";
-import Redis from "ioredis";
-import RedisStore from "connect-redis";
 import IUserDocument from "./dtos/userDto";
 import { useSession } from "./redis/connect-redis";
 dotenv.config();
 const app = express();
-// const redisStore = new RedisStore({ client: Redis });
 
 const server = http.createServer(app);
 
 const io = new Server(server, {});
-// const redisClient = new Redis();
 app.use(
   helmet({
     contentSecurityPolicy: false,
@@ -33,7 +28,6 @@ app.use(
     origin: "*",
   })
 );
-app.use(useSession);
 
 app.use("/api", routes);
 
@@ -45,15 +39,8 @@ if (process.env.NODE_ENV === "prod") {
     res.sendFile(path.resolve(__dirname1, "../client", "dist", "index.html"));
   });
 } else {
-  console.log("?");
   app.get("/", (req, res) => {
     res.json("dev API server is running");
-  });
-
-  // 세션 키 값을 테스트
-  app.get("/test-session", (req, res) => {
-    // 세션에 테스트 값을 설정
-    // 세션 키 값을 응답으로 보내기
   });
 }
 app.use(notFound);
