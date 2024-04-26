@@ -67,15 +67,15 @@ const signInUser = async (email: string, password: string) => {
   }
 };
 const getUsers = async (keyword: any, userId: string) => {
-  let filter = {}
-  keyword 
-    ? filter = {
+  let filter = {};
+  keyword
+    ? (filter = {
         $or: [
           { nickname: { $regex: keyword, $options: "i" } },
           { email: { $regex: keyword, $options: "i" } },
         ],
-      }
-    : filter = {};
+      })
+    : (filter = {});
   const users = await User.find(filter).find({ _id: { $ne: userId } });
   if (users) {
     return users;
@@ -85,8 +85,7 @@ const getUsers = async (keyword: any, userId: string) => {
     throw error;
   }
 };
-export default {
-  signUpUser,
-  signInUser,
-  getUsers,
-};
+export default { signUpUser, signInUser, getUsers };
+function next() {
+  throw new Error("Function not implemented.");
+}

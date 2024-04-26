@@ -10,14 +10,13 @@ import http from "http";
 import path from "path";
 import { Server } from "socket.io";
 import IUserDocument from "./dtos/userDto";
+import { useSession } from "./redis/connect-redis";
 dotenv.config();
-const app = express();
 connectDB();
-
+const app = express();
 const server = http.createServer(app);
 
 const io = new Server(server, {});
-
 app.use(
   helmet({
     contentSecurityPolicy: false,
@@ -46,7 +45,10 @@ if (process.env.NODE_ENV === "prod") {
 }
 app.use(notFound);
 app.use(errorHandler);
-
+io.use((socket, next: unknown) => {
+  console.log(socket.request);
+  useSession(socket.request, {}, next);
+});
 io.on("connection", (socket) => {
   console.log("connected to socket.io");
 
