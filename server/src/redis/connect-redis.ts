@@ -1,6 +1,5 @@
 import RedisStore from "connect-redis";
 import session from "express-session";
-import { IncomingMessage } from "http";
 import redisClient from "./redis-client";
 
 interface sessionConfig {}
@@ -20,5 +19,5 @@ export const sessionConfig = {
   saveUninitialized: false,
 } as any;
 
-export const useSession = (req: IncomingMessage, {}, next: unknown) =>
+export const useSession = () =>
   session(sessionConfig);

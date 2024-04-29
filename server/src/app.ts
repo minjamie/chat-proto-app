@@ -45,10 +45,8 @@ if (process.env.NODE_ENV === "prod") {
 }
 app.use(notFound);
 app.use(errorHandler);
-io.use((socket, next: unknown) => {
-  console.log(socket.request);
-  useSession(socket.request, {}, next);
-});
+app.use(useSession)
+
 io.on("connection", (socket) => {
   console.log("connected to socket.io");
 
