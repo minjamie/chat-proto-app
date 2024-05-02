@@ -6,63 +6,56 @@ import axios from "axios";
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import mongoose from "mongoose";
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 const { ObjectId } = mongoose.Types;
 
 interface IError extends Error {
   statusCode: number;
 }
-async function getUserIdFromAPI() {
-    try {
-        const response = await axios.get('http://api.dorihun.r-e.kr:8080/user');
-      return response.data.user_id;
-    } catch (error) {
-        console.error('Error fetching user ID from API:', error);
-        throw error;
-    }
+
+function toObjectHexString(number: number): string {
+  // 숫자를 16진수 문자열로 변환
+  const hexString = number.toString(16);
+  // 16진수 문자열을 24자리의 문자열로 패딩하여 반환
+  return hexString.padStart(24, "0").toString();
 }
 
-function toObjectIdLikeHexString(number: number): string {
-    // 숫자를 16진수 문자열로 변환
-    const hexString = number.toString(16);
-    // 16진수 문자열을 24자리의 문자열로 패딩하여 반환
-    return hexString.padStart(24, '0');
-}
-
-const saveUser = asyncHandler(async (req: Request, res: Response) => {
+const createUser = asyncHandler(async (req: Request, res: Response) => {
   try {
-    
-    const userId = await getUserIdFromAPI();
-    const uuid = uuidv4(); 
-    const objectIdLikeHexString = toObjectIdLikeHexString(userId);
-    const _id = new ObjectId(objectIdLikeHexString.toString() as string);
+    const { pk, nickname, pic } = req.body;
+    const objectId = toObjectHexString(pk) as string;
+    const _id = new ObjectId(objectId);
 
     const user = await User.create({
-    _id,
-    nickname:uuid.substring(0, 10),
-    email:uuid.substring(0, 10),
-    password:"test",
-    pic:"test",
-  });
+      _id,
+      nickname,
+      pic,
+    });
 
-    res.status(201).json(user);
+    if (user) {
+      await saveUserKey(pk, objectId);
+      res.status(201).json(user);
+    } else {
+      const error = new Error("유저 생성에 실패") as IError;
+      error.statusCode = 500;
+      throw error;
+    }
   } catch (error: any) {
     errorLoggerMiddleware(error as IError, req, res);
     res.status(error.statusCode).json(error.message);
   }
 });
 
-const saveUserKey = asyncHandler(async (req: Request, res: Response) => {
-  try {
-    const { pk, objectId } = req.body;
-    await redisClient.set(pk.toString(), objectId);
+const saveUserKey = async (pk: string, objectId: string) => {
+  if (!pk && !objectId) {
+    const error = new Error("pk objectId 필수") as IError;
+    error.statusCode = 400;
+    throw error;
+  } else {
+    await redisClient.set(pk, objectId);
     await redisClient.set(objectId, pk);
-    res.status(201).json("성공적으로 유저 key를 생성");
-  } catch (error: any) {
-    errorLoggerMiddleware(error as IError, req, res);
-    res.status(error.statusCode).json(error.message);
   }
-});
+};
 
 const getUserKey = asyncHandler(async (req: Request, res: Response) => {
   try {
@@ -119,7 +112,7 @@ const getUsers = asyncHandler(async (req: Request, res: Response) => {
   }
 });
 export default {
-  saveUser,
+  createUser,
   saveUserKey,
   getUserKey,
   signUpUser,
