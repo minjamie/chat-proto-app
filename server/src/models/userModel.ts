@@ -4,6 +4,8 @@ import { Schema, model } from "mongoose";
 
 const userSchema = new Schema<IUserDocument>(
   {
+    email: { type: String, unique:true, required: false },
+    password: { type: String, required: false },
     nickname: { type: String, required: true },
     pic: {
       type: String,

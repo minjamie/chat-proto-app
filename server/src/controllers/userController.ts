@@ -2,11 +2,9 @@ import errorLoggerMiddleware from "@middlewares/loggerMiddleware";
 import { userService } from "@services/index";
 import User from "@src/models/userModel";
 import redisClient from "@src/redis/redis-client";
-import axios from "axios";
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import mongoose from "mongoose";
-import { v4 as uuidv4 } from "uuid";
 const { ObjectId } = mongoose.Types;
 
 interface IError extends Error {
@@ -95,6 +93,7 @@ const signInUser = asyncHandler(async (req: Request, res: Response) => {
     const user = await userService.signInUser(email, password);
     res.status(200).json(user);
   } catch (error: any) {
+    console.log(error)
     errorLoggerMiddleware(error as IError, req, res);
     res.status(error.statusCode).json(error.message);
   }
