@@ -4,8 +4,6 @@ import { Schema, model } from "mongoose";
 
 const userSchema = new Schema<IUserDocument>(
   {
-    email: { type: String, unique:true, required: false },
-    password: { type: String, required: false },
     nickname: { type: String, required: true },
     pic: {
       type: String,
@@ -24,12 +22,6 @@ const userSchema = new Schema<IUserDocument>(
 userSchema.methods.matchPassword = async function (enteredPassword: string) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
-
-userSchema.pre("save", async function (next) {
-  if (!this.isModified) next();
-  const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
-});
 
 const User = model("User", userSchema);
 export default User;
