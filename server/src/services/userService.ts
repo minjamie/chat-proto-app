@@ -85,7 +85,16 @@ const getUsers = async (keyword: any, userId: string) => {
     throw error;
   }
 };
-export default { signUpUser, signInUser, getUsers };
-function next() {
-  throw new Error("Function not implemented.");
-}
+const getUser = async (userId: any) => {
+  const users = await User.findOne({_id: userId});
+  if (users) {
+    return users;
+  } else {
+    const error = new Error("발견된 유저 없음") as IError;
+    error.statusCode = 404;
+    throw error;
+  }
+};
+
+export default { signUpUser, signInUser, getUsers, getUser };
+

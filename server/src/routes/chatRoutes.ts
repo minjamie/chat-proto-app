@@ -4,7 +4,7 @@ import express from "express";
 const router = express.Router();
 router.get("/", protect, chatController.fetchChats);
 router.post("/", protect, chatController.getAccessChat);
-router.post("/group", protect, chatController.createGroupChat);
+router.post("/study", chatController.createGroupChat);
 router.put("/group", protect, chatController.updateGroupChat);
 router.put("/group/remove", protect, chatController.removeFromGroup);
 router.put("/group/add", protect, chatController.addToGroup);

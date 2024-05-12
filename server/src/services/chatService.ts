@@ -1,6 +1,7 @@
+import { userService } from "@services/index";
 import Chat from "@src/models/chatModel";
 import User from "@src/models/userModel";
-import mongoose from 'mongoose';
+import mongoose, { ObjectId } from 'mongoose';
 const { ObjectId } = mongoose.Types;
 
 interface IError extends Error {
@@ -77,36 +78,38 @@ const fetchChats = async (reqUseId: string) => {
   }
 };
 
-const createGroupChat = async (users: string, name: string, reqUser: any) => {
-  if (!users || !name) {
-    const error = new Error("모든 필드 채워야함") as IError;
-    error.statusCode = 400;
+const createGroupChat = async (userId: any, chatId: any, name: string) => {
+  const existUser = await userService.getUser(userId)
+  if(!existUser) {
+    const error = new Error("유저 존재하지 않음") as IError;
+    error.statusCode = 403;
     throw error;
   }
 
-  users = JSON.parse(users);
-  if (users.length < 2) {
-    const error = new Error("그륩 채팅 최대 2명 필요") as IError;
-    error.statusCode = 400;
+  const existChat = await Chat.findOne({
+    _id: chatId
+  })
+
+  if(existChat) {
+    const error = new Error("이미 존재하는 채팅방") as IError;
+    error.statusCode = 403;
     throw error;
   }
 
   const createdChat = await Chat.create({
+    _id: chatId,
     chatName: name,
-    users,
+    users: userId,
     isGroupChat: true,
-    groupAdmin: reqUser,
+    groupAdmin: userId,
   });
   if (!createdChat) {
     const error = new Error("그륩 채팅 생성 실패") as IError;
     error.statusCode = 400;
     throw error;
   }
-  const fullGroupChat = await Chat.findOne({ _id: createdChat._id })
-    .populate("users", "-password")
-    .populate("groupAdmin", "-password");
 
-  if (fullGroupChat) return fullGroupChat;
+  if (createdChat) return createdChat;
   else {
     const error = new Error("그륩 채팅 조회 실패") as IError;
     error.statusCode = 404;

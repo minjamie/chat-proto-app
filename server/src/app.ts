@@ -16,18 +16,24 @@ connectDB();
 const app = express();
 const server = http.createServer(app);
 
-const io = new Server(server, {});
+const io = new Server(server, {
+  cors:{
+  origin: "http://localhost:3000",
+  methods: ["GET", "POST"],
+  credentials: true
+}
+});
 app.use(
   helmet({
     contentSecurityPolicy: false,
   })
 );
 app.use(express.json());
-app.use(
-  cors({
-    origin: "*",
-  })
-);
+app.use(cors({
+  origin: "http://localhost:3000",
+  methods: ["GET", "POST"],
+  credentials: true
+}));
 
 app.use("/api", routes);
 
@@ -49,11 +55,15 @@ app.use(useSession)
 
 io.on("connection", (socket) => {
   console.log("connected to socket.io");
+  socket.on("test", (test) => {
+    socket.emit("test");
+   console.log(test)
+  });
 
   socket.on("setup", (userData) => {
     socket.join(userData?._id);
     socket.emit("connected");
-    console.log("connected : " + userData?._id);
+    console.log("connected : " + userData);
   });
 
   socket.on("error", (error) => {
