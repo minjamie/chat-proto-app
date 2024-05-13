@@ -1,9 +1,7 @@
-import { Document, Model } from "mongoose";
+import { Document } from "mongoose";
 
 interface IUser {
   nickname?: string;
-  email?: string;
-  password: string;
   pic: string;
   isAdmin: boolean;
 }

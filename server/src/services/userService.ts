@@ -36,7 +36,6 @@ const signUpUser = async (
     return {
       _id: user._id,
       nickname: user.nickname,
-      email: user.email,
       isAdmin: user.isAdmin,
       pic: user.pic,
       token: generateToken(user._id),
@@ -55,7 +54,6 @@ const signInUser = async (email: string, password: string) => {
     return {
       _id: user._id,
       nickname: user.nickname,
-      email: user.email,
       isAdmin: user.isAdmin,
       pic: user.pic,
       token: generateToken(user._id),
@@ -86,6 +84,7 @@ const getUsers = async (keyword: any, userId: string) => {
   }
 };
 const getUser = async (userId: any) => {
+  console.log(userId)
   const users = await User.findOne({_id: userId});
   if (users) {
     return users;

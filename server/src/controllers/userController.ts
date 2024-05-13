@@ -24,11 +24,21 @@ const createUser = asyncHandler(async (req: Request, res: Response) => {
     const objectId = toObjectHexString(pk) as string;
     const _id = new ObjectId(objectId);
 
+    const existUser = await User.findOne({_id});
+
+    if (existUser) {
+      const error = new Error("이미 존재하는 유저") as IError;
+      error.statusCode = 403;
+      throw error;
+    }
+
     const user = await User.create({
       _id,
       nickname,
       pic,
     });
+
+    console.log(user)
 
     if (user) {
       await saveUserKey(pk, objectId);
@@ -39,6 +49,7 @@ const createUser = asyncHandler(async (req: Request, res: Response) => {
       throw error;
     }
   } catch (error: any) {
+    console.log(error)
     errorLoggerMiddleware(error as IError, req, res);
     res.status(error.statusCode).json(error.message);
   }
