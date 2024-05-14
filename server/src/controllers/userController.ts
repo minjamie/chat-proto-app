@@ -14,7 +14,8 @@ interface IError extends Error {
 function toObjectHexString(number: number): string {
   // 숫자를 16진수 문자열로 변환
   const hexString = number.toString(16);
-  // 16진수 문자열을 24자리의 문자열로 패딩하여 반환
+  console.log(number, hexString)
+// 16진수 문자열을 24자리의 문자열로 패딩하여 반환
   return hexString.padStart(24, "0").toString();
 }
 
@@ -22,6 +23,7 @@ const createUser = asyncHandler(async (req: Request, res: Response) => {
   try {
     const { pk, nickname, pic } = req.body;
     const objectId = toObjectHexString(pk) as string;
+    console.log(objectId)
     const _id = new ObjectId(objectId);
 
     const existUser = await User.findOne({_id});
@@ -100,8 +102,8 @@ const signUpUser = asyncHandler(async (req: Request, res: Response) => {
 
 const signInUser = asyncHandler(async (req: Request, res: Response) => {
   try {
-    const { email, password } = req.body;
-    const user = await userService.signInUser(email, password);
+    const { nickname } = req.body;
+    const user = await userService.signInUser(nickname);
     res.status(200).json(user);
   } catch (error: any) {
     console.log(error)

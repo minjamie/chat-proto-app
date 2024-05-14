@@ -1,4 +1,5 @@
 import { userService } from "@services/index";
+import { toObjectHexString } from "@src/configs/toObjectHexString";
 import Chat from "@src/models/chatModel";
 import User from "@src/models/userModel";
 import mongoose, { ObjectId } from 'mongoose';
@@ -7,6 +8,34 @@ const { ObjectId } = mongoose.Types;
 interface IError extends Error {
   statusCode: number;
 }
+const getChat = async (studyId: number, userId:number) => {
+  if (!studyId) {
+    const error = new Error("studyId 필수") as IError;
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const _id = toObjectHexString(studyId)
+  const userObjectId = toObjectHexString(userId)
+  const isChat = await Chat.find({
+    _id,
+    isDeleted: false,
+    $and: [
+      { users: { $elemMatch: { $eq: userObjectId } } },
+    ],
+  })
+    .populate("users", "-password")
+    .populate("latestMessage");
+
+  const resultChat = await User.populate(isChat, {
+    path: "latestMessage.sender",
+    select: "name pic email",
+  });
+
+  if (resultChat && resultChat?.length > 0) {
+    return isChat[0];
+  }
+};
 const getAccessChat = async (userId: string, reqUseId: string) => {
   if (!userId) {
     const error = new Error("없는 유저 id") as IError;
@@ -57,13 +86,14 @@ const getAccessChat = async (userId: string, reqUseId: string) => {
 const fetchChats = async (reqUseId: string) => {
   const chats = await Chat.find({
     $or: [
-      { users: { $elemMatch: { $eq: reqUseId } } },
-      { groupAdmin: reqUseId}
+      // { users: { $elemMatch: { $eq: reqUseId } } },
+      { users: reqUseId}
     ]
   })
     .populate("users", "-password")
     .populate("groupAdmin", "-password")
     .populate("latestMessage");
+  console.log(chats)
 
   const resultChat = await User.populate(chats, {
     path: "latestMessage.sender",
@@ -89,6 +119,7 @@ const createGroupChat = async (userId: any, chatId: any, name: string) => {
   const existChat = await Chat.findOne({
     _id: chatId
   })
+  console.log(existChat)
 
   if(existChat) {
     const error = new Error("이미 존재하는 채팅방") as IError;
@@ -198,6 +229,7 @@ const removeFromGroup = async (chatId: string, userId: string) => {
 }
 
 export default {
+  getChat,
   getAccessChat,
   fetchChats,
   createGroupChat,

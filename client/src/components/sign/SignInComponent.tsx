@@ -1,4 +1,4 @@
-import { Input, InputGroup, InputRightElement } from "@chakra-ui/input";
+import { Input } from "@chakra-ui/input";
 import {
   Button,
   FormControl,
@@ -13,8 +13,7 @@ import { useNavigate } from "react-router-dom";
 
 export default function SignInComponent() {
   const [show, setShow] = useState(false);
-  const [email, setEmail] = useState<string | null | undefined>();
-  const [password, setPassword] = useState<string | null | undefined>();
+  const [nickname, setNickname] = useState<string | null | undefined>();
   const [loading, setLoading] = useState(false);
   const toast = useToast();
 
@@ -31,18 +30,6 @@ export default function SignInComponent() {
 
   const submitHandler = async () => {
     setLoading(true);
-    if (!email || !password) {
-      toast({
-        title: "모든 필드 입력",
-        status: "warning",
-        duration: 5000,
-        isClosable: true,
-        position: "bottom",
-      });
-      setLoading(false);
-      return;
-    }
-
     try {
       const config = {
         headers: {
@@ -52,10 +39,11 @@ export default function SignInComponent() {
 
       const { data } = await axios.post(
         "/api/user/sign-in",
-        { email, password },
+        { nickname },
         config
       ); 
 
+      console.log(data)
       toast({
         title: "로그인 성공",
         status: "success",
@@ -87,33 +75,15 @@ export default function SignInComponent() {
       justify="center"
     >
       <FormControl isRequired>
-        <FormLabel>이메일</FormLabel>
+        <FormLabel>nickname</FormLabel>
         <Input
-          placeholder="이메일을 입력해주세요"
+          placeholder="nickname 입력해주세요"
           autoComplete="off"
           onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            handleInputChange(e.target.value, setEmail)
+            handleInputChange(e.target.value, setNickname)
           }
         ></Input>
-        <FormErrorMessage>유효하지 않은 아이디</FormErrorMessage>
-      </FormControl>
-      <FormControl isRequired>
-        <FormLabel>비밀번호</FormLabel>
-        <InputGroup size="md">
-          <Input
-            type={show ? "text" : "password"}
-            placeholder="비밀번호를 입력해주세요"
-            autoComplete="off"
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              handleInputChange(e.target.value, setPassword)
-            }
-          ></Input>
-          <InputRightElement width="4.5rem">
-            <Button h="1.75rem" size="sm" onClick={handleClick}>
-              {show ? "숨기기" : "보기"}
-            </Button>
-          </InputRightElement>
-        </InputGroup>
+        <FormErrorMessage>유효하지 않은 nickname</FormErrorMessage>
       </FormControl>
       <Button
         width="100%"

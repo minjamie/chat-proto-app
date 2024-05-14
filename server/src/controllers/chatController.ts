@@ -8,12 +8,27 @@ const { ObjectId } = mongoose.Types;
 function toObjectHexString(number: number): string {
   // 숫자를 16진수 문자열로 변환
   const hexString = number.toString(16);
+  console.log(hexString)
   // 16진수 문자열을 24자리의 문자열로 패딩하여 반환
   return hexString.padStart(24, "0").toString();
 }
 interface IError extends Error {
   statusCode: number;
 }
+const getChat = asyncHandler(async (req: Request, res: Response) => {
+  try {
+    const { studyId } = req.params;
+    const { userId } = req.body;
+
+    if (studyId) {
+      const user = await chatService.getChat(Number(studyId), userId);
+      res.status(200).json(user);
+    }
+  } catch (error: any) {
+    errorLoggerMiddleware(error as IError, req, res);
+    res.status(error.statusCode).json(error.message);
+  }
+});
 const getAccessChat = asyncHandler(async (req: Request, res: Response) => {
   try {
     const { userId } = req.body;
@@ -28,9 +43,11 @@ const getAccessChat = asyncHandler(async (req: Request, res: Response) => {
   }
 });
 
+
 const fetchChats = asyncHandler(async (req: Request, res: Response) => {
   try {
     const reqUseId = req.user?._id;
+    console.log(reqUseId, "reqUseId")
     if (reqUseId) {
       const user = await chatService.fetchChats(reqUseId);
       res.status(200).json(user);
@@ -94,6 +111,7 @@ const removeFromGroup = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export default {
+  getChat,
   getAccessChat,
   fetchChats,
   createGroupChat,

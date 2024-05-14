@@ -47,10 +47,9 @@ const signUpUser = async (
   }
 };
 
-const signInUser = async (email: string, password: string) => {
-  const user = await User.findOne({ email });
-
-  if (user && (await user.matchPassword(password))) {
+const signInUser = async (nickname: string) => {
+  const user = await User.findOne({ nickname: nickname });
+  if (user) {
     return {
       _id: user._id,
       nickname: user.nickname,
@@ -59,8 +58,8 @@ const signInUser = async (email: string, password: string) => {
       token: generateToken(user._id),
     };
   } else {
-    const error = new Error("유효하지 않음") as IError;
-    error.statusCode = 401;
+    const error = new Error("유저 없음") as IError;
+    error.statusCode = 404;
     throw error;
   }
 };

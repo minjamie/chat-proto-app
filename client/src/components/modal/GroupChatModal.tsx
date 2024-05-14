@@ -77,11 +77,13 @@ export default function GroupChatModal({ children } : {children : ReactNode}) {
           Authorization: `Bearer ${user.token}`,
         },
       };
+      const random = Math.floor(Math.random() * 1234234);
       const { data } = await axios.post(
-        `/api/chat/group`,
+        `/api/chat/study`,
         {
+          studyId:random,
+          pk: "1",
           name: groupChatName,
-          users: JSON.stringify(selectedUsers.map((user) => user._id)),
         },
         config
       );
