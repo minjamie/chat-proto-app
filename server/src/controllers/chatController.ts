@@ -8,7 +8,6 @@ const { ObjectId } = mongoose.Types;
 function toObjectHexString(number: number): string {
   // 숫자를 16진수 문자열로 변환
   const hexString = number.toString(16);
-  console.log(hexString)
   // 16진수 문자열을 24자리의 문자열로 패딩하여 반환
   return hexString.padStart(24, "0").toString();
 }
@@ -18,10 +17,9 @@ interface IError extends Error {
 const getChat = asyncHandler(async (req: Request, res: Response) => {
   try {
     const { studyId } = req.params;
-    const { userId } = req.body;
-
-    if (studyId) {
-      const user = await chatService.getChat(Number(studyId), userId);
+    const reqUseId = req.user?._id;
+    if (reqUseId && studyId) {
+      const user = await chatService.getChat(Number(studyId), reqUseId);
       res.status(200).json(user);
     }
   } catch (error: any) {

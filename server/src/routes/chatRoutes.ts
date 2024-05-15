@@ -3,7 +3,7 @@ import { protect } from "@middlewares/authMiddleware";
 import express from "express";
 const router = express.Router();
 router.get("/", protect, chatController.fetchChats);
-router.get("/:studyId", chatController.getChat);
+router.get("/:studyId", protect, chatController.getChat);
 router.post("/", protect, chatController.getAccessChat);
 router.post("/study", chatController.createGroupChat);
 router.put("/group", protect, chatController.updateGroupChat);

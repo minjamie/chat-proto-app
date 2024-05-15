@@ -23,7 +23,6 @@ const createUser = asyncHandler(async (req: Request, res: Response) => {
   try {
     const { pk, nickname, pic } = req.body;
     const objectId = toObjectHexString(pk) as string;
-    console.log(objectId)
     const _id = new ObjectId(objectId);
 
     const existUser = await User.findOne({_id});

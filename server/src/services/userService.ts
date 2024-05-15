@@ -83,7 +83,6 @@ const getUsers = async (keyword: any, userId: string) => {
   }
 };
 const getUser = async (userId: any) => {
-  console.log(userId)
   const users = await User.findOne({_id: userId});
   if (users) {
     return users;

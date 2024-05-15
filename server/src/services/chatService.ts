@@ -16,19 +16,18 @@ const getChat = async (studyId: number, userId:number) => {
   }
 
   const _id = toObjectHexString(studyId)
-  const userObjectId = toObjectHexString(userId)
   const isChat = await Chat.find({
     _id,
     isDeleted: false,
     $and: [
-      { users: { $elemMatch: { $eq: userObjectId } } },
+      { users: { $elemMatch: { $eq: userId } } },
     ],
   })
     .populate("users", "-password")
     .populate("latestMessage");
 
   const resultChat = await User.populate(isChat, {
-    path: "latestMessage.sender",
+    path: "latestMessages.sender",
     select: "name pic email",
   });
 
@@ -87,13 +86,12 @@ const fetchChats = async (reqUseId: string) => {
   const chats = await Chat.find({
     $or: [
       // { users: { $elemMatch: { $eq: reqUseId } } },
-      { users: reqUseId}
+      { users: reqUseId }
     ]
   })
     .populate("users", "-password")
     .populate("groupAdmin", "-password")
     .populate("latestMessage");
-  console.log(chats)
 
   const resultChat = await User.populate(chats, {
     path: "latestMessage.sender",
@@ -119,7 +117,6 @@ const createGroupChat = async (userId: any, chatId: any, name: string) => {
   const existChat = await Chat.findOne({
     _id: chatId
   })
-  console.log(existChat)
 
   if(existChat) {
     const error = new Error("이미 존재하는 채팅방") as IError;
