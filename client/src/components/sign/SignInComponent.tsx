@@ -12,7 +12,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function SignInComponent() {
-  const [show, setShow] = useState(false);
   const [nickname, setNickname] = useState<string | null | undefined>();
   const [loading, setLoading] = useState(false);
   const toast = useToast();
