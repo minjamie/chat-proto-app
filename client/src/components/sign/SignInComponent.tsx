@@ -19,7 +19,6 @@ export default function SignInComponent() {
 
   const navigate = useNavigate();
 
-  const handleClick = () => setShow(!show);
 
   const handleInputChange = (
     value: string,
