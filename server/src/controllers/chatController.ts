@@ -19,7 +19,7 @@ const getChat = asyncHandler(async (req: Request, res: Response) => {
     const { studyId } = req.params;
     const reqUseId = req.user?._id;
     if (reqUseId && studyId) {
-      const user = await chatService.getChat(Number(studyId), reqUseId);
+      const user = await chatService.getChat(studyId, reqUseId);
       res.status(200).json(user);
     }
   } catch (error: any) {

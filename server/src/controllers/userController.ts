@@ -11,7 +11,7 @@ interface IError extends Error {
   statusCode: number;
 }
 
-function toObjectHexString(number: number): string {
+function toObjectHexString(number: any): string {
   // 숫자를 16진수 문자열로 변환
   const hexString = number.toString(16);
   console.log(number, hexString)

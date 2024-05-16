@@ -18,9 +18,8 @@ const protect = asyncHandler(
         const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as {
           sub: any; id?: string 
 };
-        const pk = Number(decoded.sub);
-        req.user = await User.findById(toObjectHexString(pk)).select("-password");
-        console.log(req.user)
+        const pk = decoded.sub
+        req.user = await User.findById(toObjectHexString(pk)) || undefined;
         next();
       } catch (error) {
         res.status(401);

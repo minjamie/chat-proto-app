@@ -8,7 +8,7 @@ const { ObjectId } = mongoose.Types;
 interface IError extends Error {
   statusCode: number;
 }
-const getChat = async (studyId: number, userId:number) => {
+const getChat = async (studyId: string, userId: string) => {
   if (!studyId) {
     const error = new Error("studyId 필수") as IError;
     error.statusCode = 400;
@@ -30,7 +30,6 @@ const getChat = async (studyId: number, userId:number) => {
     path: "latestMessages.sender",
     select: "name pic email",
   });
-
   if (resultChat && resultChat?.length > 0) {
     return isChat[0];
   }
