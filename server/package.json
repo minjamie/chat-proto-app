@@ -4,7 +4,7 @@
   "description": "서버",
   "main": "index.js",
   "scripts": {
-    "dev": "NODE_ENV=dev ts-node -r tsconfig-paths/register src/app.ts",
+    "dev": "NODE_ENV=dev nodemon -r ts-node/register -r tsconfig-paths/register src/app.ts",
     "start": "NODE_ENV=prod ts-node -r tsconfig-paths/register src/app.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "npm install --legacy-peer-deps && npm install --legacy-peer-deps --prefix ../client && npm run build --prefix ../client"
