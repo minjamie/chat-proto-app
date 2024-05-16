@@ -188,13 +188,11 @@ const addToGroup = async (chatId: string, userId: string) => {
     }
 }
 
-const removeFromGroup = async (chatId: string, userId: string) => { 
-  const userObjectId = new ObjectId(userId);
-
-  const isAddedUserChat = await Chat.findOne({ users: userObjectId, isGroupChat: true });
+const removeFromGroup = async (chatId: string, reqUserId: string, userId: string) => { 
+  const isAddedUserChat = await Chat.findOne({ groupAdmin: reqUserId, isGroupChat: true, users: userId });
 
   if (!isAddedUserChat) {
-    const error = new Error("초대되지 않은 유저") as IError;
+    const error = new Error("방장 아닌 유저 또는 해당 방에 유저없음") as IError;
     error.statusCode = 409;
     throw error; 
   } else {
