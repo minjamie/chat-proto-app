@@ -167,8 +167,6 @@ const updateGroupChat = async (chatId: string, chatName: string) => {
 }
 
 const addToGroup = async (chatId: string, userId: string) => { 
-  const userObjectId = new ObjectId(userId);
-
     const addedChat = await Chat.findByIdAndUpdate(
       chatId,
       {
@@ -224,6 +222,23 @@ const removeFromGroup = async (chatId: string, userId: string) => {
     }
   }
 }
+const deleteChat = async (chatId: string, userId: string) => {
+  const isChat = await Chat.findOne({ groupAdmin: userId, isGroupChat: true });
+
+  if (!isChat) {
+    const error = new Error("방장 아님") as IError;
+    error.statusCode = 409;
+    throw error;
+  } else {
+    const deletedChat = await Chat.updateOne({ _id: chatId }, { $set: { isDeleted: true } });
+    if (!deletedChat) {
+      const error = new Error("채팅 조회 삭제실패") as IError;
+      error.statusCode = 500;
+      throw error;
+    }
+    return deletedChat;
+  }
+}
 
 export default {
   getChat,
@@ -232,5 +247,6 @@ export default {
   createGroupChat,
   updateGroupChat,
   addToGroup,
-  removeFromGroup        
+  removeFromGroup,
+  deleteChat      
 };

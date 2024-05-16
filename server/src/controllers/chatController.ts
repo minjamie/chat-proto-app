@@ -88,9 +88,20 @@ const updateGroupChat = asyncHandler(async (req: Request, res: Response) => {
 
 const addToGroup = asyncHandler(async (req: Request, res: Response) => {
   try {
-    const { chatId, userId } = req.body;
-    const updatedGroupChat = await chatService.addToGroup(chatId, userId);
-    res.status(200).json(updatedGroupChat);
+    const { studyId, userId, type } = req.body;
+
+    const objectChatId = toObjectHexString(studyId) as string;
+    const reqUseId = req.user?._id;
+    let objectUserId 
+    if (type) {
+      objectUserId = toObjectHexString(reqUseId) as string;
+    } else {
+      objectUserId = toObjectHexString(userId) as string;
+    }
+    if (objectChatId && objectUserId) {
+      const updatedGroupChat = await chatService.addToGroup(objectChatId, objectUserId as string);
+      res.status(200).json(updatedGroupChat);
+    }
   } catch (error: any) {
     errorLoggerMiddleware(error as IError, req, res);
     res.status(error.statusCode).json(error.message);
@@ -99,9 +110,29 @@ const addToGroup = asyncHandler(async (req: Request, res: Response) => {
 
 const removeFromGroup = asyncHandler(async (req: Request, res: Response) => {
   try {
-    const { chatId, userId } = req.body;
-    const updatedGroupChat = await chatService.removeFromGroup(chatId, userId);
-    res.status(200).json(updatedGroupChat);
+    const { studyId } = req.body;
+    const objectChatId = toObjectHexString(studyId) as string;
+    const reqUseId = req.user?._id;
+    const objectUserId = toObjectHexString(reqUseId) as string;
+    if (objectChatId && objectUserId) {
+      const updatedGroupChat = await chatService.removeFromGroup(objectChatId, objectUserId);
+      res.status(200).json(updatedGroupChat);
+    }
+  } catch (error: any) {
+    errorLoggerMiddleware(error as IError, req, res);
+    res.status(error.statusCode).json(error.message);
+  }
+});
+
+const deleteChat = asyncHandler(async (req: Request, res: Response) => {
+  try {
+    const { studyId } = req.params;
+    const objectChatId = toObjectHexString(Number(studyId)) as string;
+    const reqUseId = req.user?._id;
+    if (reqUseId && objectChatId) {
+      const deleteChat = await chatService.deleteChat(objectChatId, reqUseId);
+      res.status(200).json(deleteChat);
+    }
   } catch (error: any) {
     errorLoggerMiddleware(error as IError, req, res);
     res.status(error.statusCode).json(error.message);
@@ -116,4 +147,5 @@ export default {
   addToGroup,
   updateGroupChat,
   removeFromGroup,
+  deleteChat
 };
