@@ -15,10 +15,14 @@ dotenv.config();
 connectDB();
 const app = express();
 const server = http.createServer(app);
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://shortudy.vercel.app",
+];
 
 const io = new Server(server, {
   cors:{
-  origin: "http://localhost:3000",
+  origin: allowedOrigins,
   methods: ["GET", "POST"],
   credentials: true
 }
@@ -30,7 +34,7 @@ app.use(
 );
 app.use(express.json());
 app.use(cors({
-  origin: "http://localhost:3000",
+  origin: allowedOrigins,
   methods: ["GET", "POST"],
   credentials: true
 }));
