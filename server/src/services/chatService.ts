@@ -165,8 +165,15 @@ const updateGroupChat = async (chatId: string, chatName: string) => {
   }
 }
 
-const addToGroup = async (chatId: string, userId: string) => { 
-    const addedChat = await Chat.findByIdAndUpdate(
+const addToGroup = async (chatId: string, userId: string, reqObjectUserId?: string) => { 
+  const user = await userService.getUser(userId)
+  if (!user) {
+    const error = new Error("유저가 존재하지 않음") as IError;
+    error.statusCode = 404;
+    throw error; 
+  }
+
+  const addedChat = await Chat.findByIdAndUpdate(
       chatId,
       {
         $push: { users: userId },
@@ -174,12 +181,17 @@ const addToGroup = async (chatId: string, userId: string) => {
       {
         new: true,
       }
-    ).where({ isGroupChat: true })
+  )
+    .where({ users: {
+                $ne : userId
+        }})
+    .where({ isGroupChat: true })
+    .where( reqObjectUserId ? { groupAdmin: reqObjectUserId  } : {})
       .populate("users", "-password")
       .populate("groupAdmin", "-password");
     
     if (!addedChat) {
-      const error = new Error("그륩 채팅 조회 실패") as IError;
+      const error = new Error("그륩 채팅 조회 실패 또는 이미 초대된 유저") as IError;
       error.statusCode = 404;
       throw error;
     } else {

@@ -92,14 +92,16 @@ const addToGroup = asyncHandler(async (req: Request, res: Response) => {
 
     const objectChatId = toObjectHexString(studyId) as string;
     const reqUseId = req.user?._id;
-    let objectUserId 
-    if (type) {
+    let objectUserId
+    let reqObjectUserId 
+    if (type == "join") {
       objectUserId = toObjectHexString(reqUseId) as string;
-    } else {
+    } else if (type == "accept") {
+      reqObjectUserId = toObjectHexString(reqUseId) as string;
       objectUserId = toObjectHexString(userId) as string;
     }
     if (objectChatId && objectUserId) {
-      const updatedGroupChat = await chatService.addToGroup(objectChatId, objectUserId as string);
+      const updatedGroupChat = await chatService.addToGroup(objectChatId, objectUserId as string, reqObjectUserId);
       res.status(200).json(updatedGroupChat);
     }
   } catch (error: any) {
