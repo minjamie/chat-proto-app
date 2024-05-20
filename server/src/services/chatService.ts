@@ -200,10 +200,10 @@ const addToGroup = async (chatId: string, userId: string, reqObjectUserId?: stri
 }
 
 const removeFromGroup = async (chatId: string, reqUserId: string, userId: string) => { 
-  const isAddedUserChat = await Chat.findOne({ groupAdmin: reqUserId, isGroupChat: true, users: userId });
+  const isAddedUserChat = await Chat.findOne({ _id: chatId, groupAdmin: reqUserId, isGroupChat: true, users: userId });
 
   if (!isAddedUserChat) {
-    const error = new Error("방장 아닌 유저 또는 해당 방에 유저없음") as IError;
+    const error = new Error("해당 채팅방 없거나 방장 아닌 유저 또는 해당 방에 유저없음") as IError;
     error.statusCode = 409;
     throw error; 
   } else {

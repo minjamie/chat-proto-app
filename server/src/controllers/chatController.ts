@@ -116,7 +116,7 @@ const removeFromGroup = asyncHandler(async (req: Request, res: Response) => {
     const objectChatId = toObjectHexString(studyId) as string;
     const reqUseId = req.user?._id;
     const objectReqUserId = toObjectHexString(reqUseId) as string;
-    const objectUserId = toObjectHexString(reqUseId) as string;
+    const objectUserId = toObjectHexString(userId) as string;
     if (objectChatId && objectUserId) {
       const updatedGroupChat = await chatService.removeFromGroup(objectChatId, objectReqUserId, objectUserId);
       res.status(200).json(updatedGroupChat);
