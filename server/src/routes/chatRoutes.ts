@@ -9,5 +9,5 @@ router.post("/study", chatController.createGroupChat);
 router.put("/group", protect, chatController.updateGroupChat);
 router.put("/group/remove", protect, chatController.removeFromGroup);
 router.put("/group/add", protect, chatController.addToGroup);
-router.put("/:studyId", protect, chatController.deleteChat);
+router.put("/group/:studyId", protect, chatController.deleteChat);
 export default router;
