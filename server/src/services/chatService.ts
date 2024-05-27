@@ -260,25 +260,28 @@ const addJoinToGroup = async (chatId: string, userId: string) => {
     error.statusCode = 409;
     throw error;
   } else {
-    const joinDateUser = isChat.joinDates.find(x => {
+    const joinDateUser = isChat.joinDates.find(async x => {
       const joinUserId = new mongoose.Types.ObjectId(x.userId); 
       return joinUserId.equals(userId);
     });
 
     if (!joinDateUser) {
       const joinChat = await Chat.findByIdAndUpdate(
-      chatId,
-      {
-        $push: { joinDates:  {
-        userId,
-        joinedDate: new Date(),
-        updatedDate: new Date(),
-        isRemoved: false,
-      }},
-      },
-      {
-        new: true,
-      }
+        chatId,
+        {
+          $push: {
+            joinDates:
+            {
+              userId,
+              joinedDate: new Date(),
+              updatedDate: new Date(),
+              isRemoved: false,
+            }
+          },
+        },
+        {
+          new: true,
+        }
       )
 
       if (!joinChat) {
@@ -287,6 +290,19 @@ const addJoinToGroup = async (chatId: string, userId: string) => {
         throw error;
       }
       return joinChat;
+    } else if (joinDateUser && joinDateUser.isRemoved) { 
+      const updateChat = await Chat.findOneAndUpdate(
+        { _id: chatId, "joinDates.userId": userId },
+        {
+          $set: { 
+            "joinDates.$.joinedDate": new Date(),
+            "joinDates.$.updatedDate": new Date(),
+            "joinDates.$.isRemoved": false,
+          }
+        },
+        { new: true }
+      );
+      return updateChat;
     } else {
       const error = new Error("이미 추가") as IError;
       error.statusCode = 409;
