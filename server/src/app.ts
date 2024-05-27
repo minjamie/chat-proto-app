@@ -77,6 +77,7 @@ io.on("connection", (socket) => {
   socket.on("join chat", (room) => {
     socket.join(room);
     console.log("user joined room : " + room);
+    socket.in(room).emit("join chat", room);
   });
 
   socket.on("typing", (room) => {

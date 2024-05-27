@@ -123,10 +123,12 @@ const createGroupChat = async (userId: any, chatId: any, name: string) => {
     throw error;
   }
 
+  const userUpdateAdmin = await User.updateOne({ _id: userId }, { $set: { isAdmin: true } })
+
   const createdChat = await Chat.create({
     _id: chatId,
     chatName: name,
-    users: userId,
+    users: userUpdateAdmin,
     isGroupChat: true,
     groupAdmin: userId,
   });
@@ -249,6 +251,90 @@ const deleteChat = async (chatId: string, userId: string) => {
   }
 }
 
+
+const addJoinToGroup = async (chatId: string, userId: string) => {
+  const isChat = await Chat.findOne({ _id: chatId, isGroupChat: true });
+
+  if (!isChat) {
+    const error = new Error("채팅 없음") as IError;
+    error.statusCode = 409;
+    throw error;
+  } else {
+    const joinDateUser = isChat.joinDates.find(x => {
+      const joinUserId = new mongoose.Types.ObjectId(x.userId); 
+      return joinUserId.equals(userId);
+    });
+
+    if (!joinDateUser) {
+      const joinChat = await Chat.findByIdAndUpdate(
+      chatId,
+      {
+        $push: { joinDates:  {
+        userId,
+        joinedDate: new Date(),
+        updatedDate: new Date(),
+        isRemoved: false,
+      }},
+      },
+      {
+        new: true,
+      }
+      )
+
+      if (!joinChat) {
+        const error = new Error("채팅 조회 삭제실패") as IError;
+        error.statusCode = 500;
+        throw error;
+      }
+      return joinChat;
+    } else {
+      const error = new Error("이미 추가") as IError;
+      error.statusCode = 409;
+      throw error;
+    }
+  }
+}
+
+
+const removeJoinToGroup = async (chatId: string, userId: string) => {
+  const isChat = await Chat.findOne({ _id: chatId, isGroupChat: true });
+
+  if (!isChat) {
+    const error = new Error("채팅 없음") as IError;
+    error.statusCode = 409;
+    throw error;
+  } else {
+  const joinDateUser = isChat.joinDates.find(x => {
+      const joinUserId = new mongoose.Types.ObjectId(x.userId); 
+      return joinUserId.equals(userId);
+    });
+
+    if (joinDateUser) {
+      const updateChat = await Chat.findOneAndUpdate(
+        { _id: chatId, "joinDates.userId": userId },
+        {
+          $set: { 
+            "joinDates.$.updatedDate": new Date(),
+            "joinDates.$.isRemoved": true,
+          }
+        },
+        { new: true }
+      );
+
+      if (!updateChat) {
+        const error = new Error("채팅 업데이트 실패") as IError;
+        error.statusCode = 500;
+        throw error;
+      }
+      return updateChat;
+    } else {
+      const error = new Error("사용자 없음") as IError;
+      error.statusCode = 404;
+      throw error;
+    }
+  }
+};
+
 export default {
   getChat,
   getAccessChat,
@@ -257,5 +343,7 @@ export default {
   updateGroupChat,
   addToGroup,
   removeFromGroup,
-  deleteChat      
+  deleteChat,
+  addJoinToGroup,
+  removeJoinToGroup
 };

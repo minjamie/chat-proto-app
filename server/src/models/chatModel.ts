@@ -15,6 +15,14 @@ const chatModel = new Schema<IChatDocument>(
       type: Schema.Types.Boolean,
       index: true,
       default: false
+    },
+    noti: {
+      type: Schema.Types.Mixed,
+      default: []
+    },
+    joinDates: {
+      type: Schema.Types.Mixed,
+      default: []
     }
   },
   { timestamps: true }

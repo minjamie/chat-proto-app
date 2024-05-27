@@ -1,8 +1,8 @@
-import { Document, Model } from "mongoose";
+import { Document } from "mongoose";
 import Chat from "./chatDto";
 import User from "./userDto";
 
-interface Message {
+export interface Message {
   sender?: string;
   content?: string;
   chat: Chat;

@@ -5,7 +5,7 @@ import asyncHandler from "express-async-handler";
 import mongoose from "mongoose";
 const { ObjectId } = mongoose.Types;
 
-function toObjectHexString(number: number): string {
+function toObjectHexString(number: any): string {
   // 숫자를 16진수 문자열로 변환
   const hexString = number.toString(16);
   // 16진수 문자열을 24자리의 문자열로 패딩하여 반환
@@ -142,6 +142,35 @@ const deleteChat = asyncHandler(async (req: Request, res: Response) => {
   }
 });
 
+const addJoinToGroup = asyncHandler(async (req: Request, res: Response) => {
+  try {
+    const { studyId } = req.params;
+    const objectChatId = toObjectHexString(studyId) as string;
+    const reqUseId = req.user?._id;
+    if (reqUseId && objectChatId) {
+      const deleteChat = await chatService.addJoinToGroup(objectChatId, reqUseId);
+      res.status(200).json(deleteChat);
+    }
+  } catch (error: any) {
+    errorLoggerMiddleware(error as IError, req, res);
+    res.status(error.statusCode).json(error.message);
+  }
+});
+
+const removeJoinToGroup = asyncHandler(async (req: Request, res: Response) => {
+  try {
+    const { studyId } = req.params;
+    const objectChatId = toObjectHexString(studyId) as string;
+    const reqUseId = req.user?._id;
+    if (reqUseId && objectChatId) {
+      const deleteChat = await chatService.removeJoinToGroup(objectChatId, reqUseId);
+      res.status(200).json(deleteChat);
+    }
+  } catch (error: any) {
+    errorLoggerMiddleware(error as IError, req, res);
+    res.status(error.statusCode).json(error.message);
+  }
+});
 export default {
   getChat,
   getAccessChat,
@@ -150,5 +179,7 @@ export default {
   addToGroup,
   updateGroupChat,
   removeFromGroup,
-  deleteChat
+  deleteChat,
+  addJoinToGroup,
+  removeJoinToGroup
 };
