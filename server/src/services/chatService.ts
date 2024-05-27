@@ -25,6 +25,9 @@ const getChat = async (studyId: string, userId: string) => {
   })
     .populate("users", "-password")
     .populate("latestMessage");
+  if (isChat.length == 0) {
+    return []
+  }
 
   const resultChat = await User.populate(isChat, {
     path: "latestMessages.sender",
@@ -116,6 +119,7 @@ const createGroupChat = async (userId: any, chatId: any, name: string) => {
   const existChat = await Chat.findOne({
     _id: chatId
   })
+  console.log(existUser, existChat)
 
   if(existChat) {
     const error = new Error("이미 존재하는 채팅방") as IError;
@@ -123,12 +127,10 @@ const createGroupChat = async (userId: any, chatId: any, name: string) => {
     throw error;
   }
 
-  const userUpdateAdmin = await User.updateOne({ _id: userId }, { $set: { isAdmin: true } })
-
   const createdChat = await Chat.create({
     _id: chatId,
     chatName: name,
-    users: userUpdateAdmin,
+    users: userId,
     isGroupChat: true,
     groupAdmin: userId,
   });

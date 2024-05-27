@@ -23,7 +23,7 @@ const allowedOrigins = [
 const io = new Server(server, {
   cors:{
   origin: allowedOrigins,
-  methods: ["GET", "POST"],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], 
   credentials: true
 }
 });
@@ -35,7 +35,7 @@ app.use(
 app.use(express.json());
 app.use(cors({
   origin: allowedOrigins,
-  methods: ["GET", "POST"],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], 
   credentials: true
 }));
 
