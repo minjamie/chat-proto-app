@@ -1,13 +1,14 @@
-import errorLoggerMiddleware from "@middlewares/loggerMiddleware";
-import User from "@src/models/userModel";
-import { Request, Response } from "express";
-import asyncHandler from "express-async-handler";
-import { v4 as uuidv4 } from "uuid";
 import {
+  IError,
   getUserIdFromAPI,
   toObjectIdLikeHexString,
-  IError,
 } from "./userController";
+import { Request, Response } from "express";
+
+import User from "@src/models/userModel";
+import asyncHandler from "express-async-handler";
+import errorLoggerMiddleware from "@middlewares/loggerMiddleware";
+import { v4 as uuidv4 } from "uuid";
 
 const saveUser = asyncHandler(async (req: Request, res: Response) => {
   try {

@@ -17,6 +17,7 @@
       "@utils/*": ["src/utils/*"]
     },
     "allowImportingTsExtensions": true,
+    "noEmit": true,
     "typeRoots": ["./src/types", "./node_modules/@types"]
   }
 }

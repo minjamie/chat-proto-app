@@ -1,8 +1,10 @@
-import errorLoggerMiddleware from "@middlewares/loggerMiddleware";
-import { chatService } from "@services/index";
 import { Request, Response } from "express";
+
 import asyncHandler from "express-async-handler";
+import { chatService } from "@services/index";
+import errorLoggerMiddleware from "@middlewares/loggerMiddleware";
 import mongoose from "mongoose";
+
 const { ObjectId } = mongoose.Types;
 
 function toObjectHexString(number: any): string {
@@ -171,6 +173,108 @@ const removeJoinToGroup = asyncHandler(async (req: Request, res: Response) => {
     res.status(error.statusCode).json(error.message);
   }
 });
+
+// 공지 작성 
+const createChatNotification = asyncHandler(async (req: Request, res: Response) => {
+  try {
+    const { studyId } = req.params;
+    const { notiContent } = req.body;
+    const objectChatId = toObjectHexString(studyId) as string;
+    const reqUseId = req.user?._id;
+    if (reqUseId && objectChatId) {
+      const createNotiChat = await chatService.createChatNotification(objectChatId, reqUseId, notiContent);
+      res.status(201).json(createNotiChat);
+    }
+  } catch (error: any) {
+    errorLoggerMiddleware(error as IError, req, res);
+    res.status(error.statusCode).json(error.message);
+  }
+});
+
+// 기존 공지 수정 (noti id)
+const editChatNotification = asyncHandler(async (req: Request, res: Response) => {
+  try {
+    const { studyId } = req.params;
+    const { notiId, notiContent, isTop } = req.body;
+    const objectChatId = toObjectHexString(studyId) as string;
+    const reqUseId = req.user?._id;
+    if (reqUseId && objectChatId) {
+      const editNotiChat = await chatService.editChatNotification(objectChatId, reqUseId, notiId, notiContent, isTop);
+      res.status(200).json(editNotiChat);
+    }
+  } catch (error: any) {
+    errorLoggerMiddleware(error as IError, req, res);
+    res.status(error.statusCode).json(error.message);
+  }
+});
+
+// 공지 내리기 (현재 top을 제거)
+const demoteChatNotification = asyncHandler(async (req: Request, res: Response) => {
+  try {
+    const { studyId } = req.params;
+    const objectChatId = toObjectHexString(studyId) as string;
+    const reqUseId = req.user?._id;
+    if (reqUseId && objectChatId) {
+      const demoteNotiChat = await chatService.demoteChatNotification(objectChatId, reqUseId);
+      res.status(200).json(demoteNotiChat);
+    }
+  } catch (error: any) {
+    errorLoggerMiddleware(error as IError, req, res);
+    res.status(error.statusCode).json(error.message);
+  }
+});
+
+// 공지 삭제 (noti id)
+const removeChatNotification = asyncHandler(async (req: Request, res: Response) => {
+  try {
+    const { studyId } = req.params;
+    const { notiId } = req.query;
+    const objectChatId = toObjectHexString(studyId) as string;
+    const reqUseId = req.user?._id;
+    if (reqUseId && objectChatId && notiId) {
+      const removeNotiChat = await chatService.removeChatNotification(objectChatId, reqUseId, notiId as string);
+      res.status(200).json(removeNotiChat);
+    }
+  } catch (error: any) {
+    errorLoggerMiddleware(error as IError, req, res);
+    res.status(error.statusCode).json(error.message);
+  }
+});
+
+//전체 공지 확인
+const getAllNoticeInChat = asyncHandler(async (req: Request, res: Response) => {
+  try {
+    const { studyId } = req.params;
+    const objectChatId = toObjectHexString(studyId) as string;
+    const reqUseId = req.user?._id;
+    if (reqUseId && objectChatId) {
+      const notiList = await chatService.getAllNoticeInChat(objectChatId, reqUseId);
+      res.status(200).json(notiList);
+    }
+  } catch (error: any) {
+    errorLoggerMiddleware(error as IError, req, res);
+    res.status(error.statusCode).json(error.message);
+  }
+});
+
+// 단일 공지 확인
+const getNoticeInChat = asyncHandler(async (req: Request, res: Response) => {
+  try {
+    const { studyId } = req.params;
+    const { notiId } = req.query;
+    const objectChatId = toObjectHexString(studyId) as string;
+    const reqUseId = req.user?._id;
+    if (reqUseId && objectChatId) {
+      const notice = await chatService.getNoticeInChat(objectChatId, reqUseId, notiId as string);
+      res.status(200).json(notice);
+    }
+  } catch (error: any) {
+    errorLoggerMiddleware(error as IError, req, res);
+    res.status(error.statusCode).json(error.message);
+  }
+});
+
+
 export default {
   getChat,
   getAccessChat,
@@ -181,5 +285,11 @@ export default {
   removeFromGroup,
   deleteChat,
   addJoinToGroup,
-  removeJoinToGroup
+  removeJoinToGroup,
+  createChatNotification,
+  editChatNotification,
+  demoteChatNotification,
+  removeChatNotification,
+  getAllNoticeInChat,
+  getNoticeInChat
 };
