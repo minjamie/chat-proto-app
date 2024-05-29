@@ -1,6 +1,7 @@
+import { Schema, model } from "mongoose";
+
 import IUserDocument from "@dtos/userDto";
 import bcrypt from "bcrypt";
-import { Schema, model } from "mongoose";
 
 const userSchema = new Schema<IUserDocument>(
   {

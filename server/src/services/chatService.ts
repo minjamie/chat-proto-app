@@ -1,8 +1,12 @@
 import { userService } from "@services/index";
 import { toObjectHexString } from "@src/configs/toObjectHexString";
+import { INoti } from "@src/dtos/chatDto";
 import Chat from "@src/models/chatModel";
+import Noti from "@src/models/notiModel";
 import User from "@src/models/userModel";
+import { randomUUID } from "crypto";
 import mongoose, { ObjectId } from 'mongoose';
+
 const { ObjectId } = mongoose.Types;
 
 interface IError extends Error {
@@ -147,6 +151,7 @@ const createGroupChat = async (userId: any, chatId: any, name: string) => {
     throw error;
   }
 };
+
 const updateGroupChat = async (chatId: string, chatName: string) => { 
   const updatedChat = await Chat.findByIdAndUpdate(
     chatId,
@@ -324,7 +329,6 @@ const addJoinToGroup = async (chatId: string, userId: string) => {
   }
 }
 
-
 const removeJoinToGroup = async (chatId: string, userId: string) => {
   const isChat = await Chat.findOne({ _id: chatId, isGroupChat: true });
 
@@ -364,6 +368,162 @@ const removeJoinToGroup = async (chatId: string, userId: string) => {
   }
 };
 
+// 채팅방 공지 생성
+const createChatNotification = async (chatId: string, userId: ObjectId, notiContent: string) => {
+  const isChat = await Chat.findOne({ _id: chatId, groupAdmin: userId, isGroupChat: true });
+
+  if (!isChat) {
+    const error = new Error("채팅 개설자가 아니거나, 채팅이 없음") as IError;
+    error.statusCode = 409;
+    throw error;
+  }
+  
+  if(isChat.topNoti) 
+    isChat.noti[isChat.topNoti].isTop = false;
+
+  const newNoti = {
+    _id: randomUUID(),
+    isTop: true,
+    contents: notiContent,
+    createdDate: new Date(),
+    updatedDate: new Date(),
+  };
+
+  isChat.noti.push(newNoti);
+  isChat.topNoti = isChat.noti.length - 1;
+
+  const updatedChat = await isChat.save();
+
+  return updatedChat;
+}
+
+// 채팅방 공지 수정
+const editChatNotification = async (chatId: string, userId: ObjectId, noticeId: string, notiContent: string, isTop: boolean) => {
+  const isChat = await Chat.findOne({ _id: chatId, groupAdmin: userId, isGroupChat: true });
+
+  if (!isChat) {
+    const error = new Error("채팅 개설자가 아니거나, 채팅이 없음") as IError;
+    error.statusCode = 409;
+    throw error;
+  }
+
+  const isNoti = isChat.noti.findIndex(noti => noti._id === noticeId);
+  if (isNoti == -1) {
+    const error = new Error("공지사항 찾을 수 없음") as IError;
+    error.statusCode = 404;
+    throw error;
+  }
+  if(isTop && isNoti !== isChat.topNoti) {
+    if(isChat.topNoti) 
+      isChat.noti[isChat.topNoti].isTop = false;
+    isChat.topNoti = isNoti;
+  }
+  if(isTop != null)
+    isChat.noti[isNoti].isTop = isTop;
+  isChat.noti[isNoti].contents = notiContent;
+  isChat.noti[isNoti].updatedDate = new Date();
+
+  const updateChat = await isChat.save();
+  
+    if (!updateChat) {
+      const error = new Error("공지사항 업데이트 실패") as IError;
+      error.statusCode = 500;
+      throw error;
+    }  
+  return updateChat;
+}
+
+// 현재 공지 내리기.
+const demoteChatNotification = async (chatId: string, userId: ObjectId) => {
+  const isChat = await Chat.findOne({ _id: chatId, groupAdmin: userId, isGroupChat: true });
+
+  if (!isChat) {
+    const error = new Error("채팅 개설자가 아니거나, 채팅이 없음") as IError;
+    error.statusCode = 409;
+    throw error;
+  }
+
+  const noticeIdx = isChat.topNoti;
+  if (noticeIdx === null) {
+    const error = new Error("현재 공지가 설정되어 있지 않습니다") as IError;
+    error.statusCode = 404;
+    throw error;
+  }
+  
+  isChat.noti[noticeIdx].isTop = false;
+  isChat.topNoti = null;
+
+  const updatedChat = await isChat.save();
+  
+  return updatedChat;
+}
+
+// 공지 삭제.
+const removeChatNotification = async (chatId: string, userId: ObjectId, noticeId: string) => {
+  const isChat = await Chat.findOne({ _id: chatId, groupAdmin: userId, isGroupChat: true });
+  if (!isChat) {
+    const error = new Error("채팅 개설자가 아니거나, 채팅이 없음") as IError;
+    error.statusCode = 409;
+    throw error;
+  }
+
+  if(isChat.topNoti !== null && isChat.noti[isChat.topNoti]._id === noticeId){
+    isChat.topNoti = null;
+    await isChat.save();
+  }
+
+  const deletedNoti = await Chat.findByIdAndUpdate(
+    chatId,
+    { $pull: { noti: { _id: noticeId} } },
+    {
+      new: true,
+    }
+  )
+  
+    if (!deletedNoti) {
+      const error = new Error("공지사항 삭제 실패") as IError;
+      error.statusCode = 500;
+      throw error;
+    }  
+  return deletedNoti;
+}
+
+// 채팅 내 전체 공지 확인
+const getAllNoticeInChat = async (chatId: string, userId: ObjectId) => {
+  const isChat = await Chat.findOne({ _id: chatId, users: userId, isGroupChat: true });
+
+  if (!isChat) {
+    const error = new Error("채팅에 속하지 않았거나, 채팅이 없음.") as IError;
+    error.statusCode = 409;
+    throw error;
+  }
+
+  const notis = isChat.noti || [];
+  
+  return notis;
+}
+
+// 채팅 내 공지 단일 확인
+const getNoticeInChat = async (chatId: string, userId: string, noticeId: string) => {
+  const isChat = await Chat.findOne({ _id: chatId, users: userId, isGroupChat: true });
+  if (!isChat) {
+    const error = new Error("채팅에 속하지 않았거나, 채팅이 없음.") as IError;
+    error.statusCode = 409;
+    throw error;
+  }
+
+  const notice = isChat.noti.find(noti => noti._id === noticeId);
+  if (!notice) {
+    const error = new Error("공지사항 찾을 수 없음") as IError;
+    error.statusCode = 404;
+    throw error;
+  }
+
+  return notice;
+}
+
+
+
 export default {
   getChat,
   getAccessChat,
@@ -374,5 +534,11 @@ export default {
   removeFromGroup,
   deleteChat,
   addJoinToGroup,
-  removeJoinToGroup
+  removeJoinToGroup,
+  createChatNotification,
+  editChatNotification,
+  demoteChatNotification,
+  removeChatNotification,
+  getAllNoticeInChat,
+  getNoticeInChat
 };

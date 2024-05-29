@@ -89,7 +89,7 @@ const deleteUser = asyncHandler(async (req: Request, res: Response) => {
     }
 
     await redisClient.del(id);
-    await redisClient.del(user._id.toString());
+    await redisClient.del(objectId);
 
     res.status(200).json({ message: "유저 삭제 완료" });
   } catch (error: any) {

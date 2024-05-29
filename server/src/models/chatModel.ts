@@ -1,5 +1,6 @@
 import { default as Chat, default as IChatDocument } from "@src/dtos/chatDto";
 import { Schema, model } from "mongoose";
+import notiSchema from "./notiModel";
 
 const chatModel = new Schema<IChatDocument>(
   {
@@ -16,10 +17,8 @@ const chatModel = new Schema<IChatDocument>(
       index: true,
       default: false
     },
-    noti: {
-      type: Schema.Types.Mixed,
-      default: []
-    },
+    noti: [notiSchema],
+    topNoti: { type: Number, default: null },
     joinDates: {
       type: Schema.Types.Mixed,
       default: []
