@@ -384,9 +384,7 @@ const createChatNotification = async (chatId: string, userId: ObjectId, notiCont
   const newNoti = {
     _id: randomUUID(),
     isTop: true,
-    contents: notiContent,
-    createdDate: new Date(),
-    updatedDate: new Date(),
+    contents: notiContent
   };
 
   isChat.noti.push(newNoti);
@@ -421,7 +419,6 @@ const editChatNotification = async (chatId: string, userId: ObjectId, noticeId: 
   if(isTop != null)
     isChat.noti[isNoti].isTop = isTop;
   isChat.noti[isNoti].contents = notiContent;
-  isChat.noti[isNoti].updatedDate = new Date();
 
   const updateChat = await isChat.save();
   
@@ -467,17 +464,29 @@ const removeChatNotification = async (chatId: string, userId: ObjectId, noticeId
     throw error;
   }
 
-  if(isChat.topNoti !== null && isChat.noti[isChat.topNoti]._id === noticeId){
-    isChat.topNoti = null;
-    await isChat.save();
+  const noticeIdx = isChat.noti.findIndex(noti => noti._id === noticeId);
+  if (noticeIdx === -1) {
+    const error = new Error("공지사항을 찾을 수 없음") as IError;
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const update:any = {
+    $pull: { noti: { _id: noticeId } }
+  };
+
+  if(isChat.topNoti !== null){
+    if (isChat.topNoti === noticeIdx) {
+      update["$set"] = { topNoti: null }
+    }else if (noticeIdx < isChat.topNoti) {
+      update["$set"] = { topNoti: isChat.topNoti - 1 }
+    }
   }
 
   const deletedNoti = await Chat.findByIdAndUpdate(
     chatId,
-    { $pull: { noti: { _id: noticeId} } },
-    {
-      new: true,
-    }
+    update,
+    { new: true }
   )
   
     if (!deletedNoti) {

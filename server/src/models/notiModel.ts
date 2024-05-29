@@ -6,9 +6,7 @@ const notiSchema = new Schema<INoti>(
     {
       _id: { type: String, required: true, unique: true },
       isTop: { type: Boolean, default: false },
-      contents: { type: String, required: true },
-      createdDate: { type: Date, default: Date.now },
-      updatedDate: { type: Date, default: Date.now }
+      contents: { type: String, required: true }
     },
     { timestamps: true }
   );
