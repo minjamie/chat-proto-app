@@ -59,15 +59,9 @@ app.use(useSession)
 
 io.on("connection", (socket) => {
   console.log("connected to socket.io");
-  socket.on("test", (test) => {
-    socket.emit("test");
-   console.log(test)
-  });
-
   socket.on("setup", (userData) => {
     socket.join(userData?._id);
     socket.emit("connected");
-    console.log("connected : " + userData);
   });
 
   socket.on("error", (error) => {
@@ -75,16 +69,14 @@ io.on("connection", (socket) => {
   });
 
   socket.on("join chat", (room) => {
-    socket.join(room);
-    console.log("user joined room : " + room);
-    socket.in(room).emit("join chat", room);
+    socket.join(room._id);
+    socket.in(room._id).emit("user joined", room);
   });
 
   socket.on("typing", (room) => {
-    socket.in(room).emit("typing");
-    console.log(colors.yellow(room));
+    socket.in(room._id).emit("typing");
   });
-  socket.on("stop typing", (room) => socket.in(room).emit("stop typing"));
+  socket.on("stop typing", (room) => socket.in(room._id).emit("stop typing"));
 
   socket.on("new message", (newMessageReceived) => {
     let chat = newMessageReceived.chat;

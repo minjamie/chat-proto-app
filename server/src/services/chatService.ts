@@ -255,14 +255,19 @@ const deleteChat = async (chatId: string, userId: string) => {
 
 
 const addJoinToGroup = async (chatId: string, userId: string) => {
-  const isChat = await Chat.findOne({ _id: chatId, isGroupChat: true });
+  const userObjectId = new mongoose.Types.ObjectId(userId);
+  const isChat = await Chat.findOne({ _id: chatId, isGroupChat: true })
+    .populate("users", "-password")
+    .populate("groupAdmin", "-password")
+    .populate("latestMessage");
+;
 
   if (!isChat) {
     const error = new Error("채팅 없음") as IError;
     error.statusCode = 409;
     throw error;
   } else {
-    const joinDateUser = isChat.joinDates.find(async x => {
+    const joinDateUser = isChat.joinDates.find(x => {
       const joinUserId = new mongoose.Types.ObjectId(x.userId); 
       return joinUserId.equals(userId);
     });
@@ -285,11 +290,16 @@ const addJoinToGroup = async (chatId: string, userId: string) => {
           new: true,
         }
       )
+        .where({ groupAdmin: {
+                $ne : userId
+        }})
+        .populate("users", "-password")
+    .populate("groupAdmin", "-password")
+    .populate("latestMessage");
+
 
       if (!joinChat) {
-        const error = new Error("채팅 조회 삭제실패") as IError;
-        error.statusCode = 500;
-        throw error;
+        return isChat
       }
       return joinChat;
     } else if (joinDateUser && joinDateUser.isRemoved) { 
@@ -303,12 +313,13 @@ const addJoinToGroup = async (chatId: string, userId: string) => {
           }
         },
         { new: true }
-      );
+      ).populate("users", "-password")
+    .populate("groupAdmin", "-password")
+    .populate("latestMessage");
+;
       return updateChat;
     } else {
-      const error = new Error("이미 추가") as IError;
-      error.statusCode = 409;
-      throw error;
+      return isChat
     }
   }
 }
