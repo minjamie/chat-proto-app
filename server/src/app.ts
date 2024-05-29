@@ -70,7 +70,7 @@ io.on("connection", (socket) => {
 
   socket.on("join chat", (room) => {
     socket.join(room._id);
-    socket.in(room._id).emit("user joined", room);
+    if(room) socket.in(room._id).emit("user joined", room);
   });
 
   socket.on("typing", (room) => {
