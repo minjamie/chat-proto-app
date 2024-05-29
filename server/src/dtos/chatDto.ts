@@ -1,20 +1,17 @@
-import { Document, ObjectId } from "mongoose";
-
+import { Document } from "mongoose";
 import { Message } from "./messageDto";
 import User from "./userDto";
 
 export interface INoti {
   _id: String;
   isTop: boolean,
-  contents: string,
-  createdDate: Date,
-  updatedDate: Date
+  contents: string
 }
 
-interface IJoinDates {
+export interface IJoinDates {
   userId: string,
   joinedDate: Date,
-  updatedDate: Date
+  updatedDate: Date,
   isRemoved: boolean,
 }
 
@@ -29,4 +26,18 @@ interface IChat {
   topNoti: number | null;
   joinDates: IJoinDates[]
 }
+
 export default interface IChatDocument extends IChat, Document {}
+
+
+export interface ChatResponseDTO {
+  chatId: string;
+  chatName: string;
+  isGroupChat: boolean;
+  users: User[];
+  latestMessage?: Message;
+  groupAdmin: User;
+  isDeleted: boolean
+  topNoti: INoti;
+  joinDates: IJoinDates[]
+}
